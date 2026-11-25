@@ -1,0 +1,109 @@
+{
+ "actions": [],
+ "creation": "2026-08-26 00:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "vehicle",
+  "ts",
+  "latitude",
+  "longitude",
+  "speed_kmph",
+  "heading",
+  "ignition",
+  "geofence_event",
+  "station"
+ ],
+ "fields": [
+  {
+   "fieldname": "vehicle",
+   "label": "Vehicle",
+   "fieldtype": "Link",
+   "options": "Kharj Fleet Vehicle",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "ts",
+   "label": "Timestamp",
+   "fieldtype": "Datetime",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "latitude",
+   "label": "Latitude",
+   "fieldtype": "Float",
+   "precision": "6"
+  },
+  {
+   "fieldname": "longitude",
+   "label": "Longitude",
+   "fieldtype": "Float",
+   "precision": "6"
+  },
+  {
+   "fieldname": "speed_kmph",
+   "label": "Speed (km/h)",
+   "fieldtype": "Float",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "heading",
+   "label": "Heading",
+   "fieldtype": "Float"
+  },
+  {
+   "fieldname": "ignition",
+   "label": "Ignition",
+   "fieldtype": "Check"
+  },
+  {
+   "fieldname": "geofence_event",
+   "label": "Geofence Event",
+   "fieldtype": "Select",
+   "options": "\nEntry\nExit\nInside\nOutside"
+  },
+  {
+   "fieldname": "station",
+   "label": "Station",
+   "fieldtype": "Link",
+   "options": "Kharj Station"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-26 00:00:00",
+ "modified_by": "Administrator",
+ "module": "Kharj Fuel",
+ "name": "Kharj GPS Ping",
+ "owner": "Administrator",
+ "istable": 0,
+ "track_changes": 1,
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Kharj Operator",
+   "write": 1,
+   "create": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "autoname": "hash"
+}

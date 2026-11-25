@@ -1,0 +1,95 @@
+{
+ "actions": [],
+ "creation": "2026-08-26 00:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "station_code",
+  "station_name",
+  "latitude",
+  "longitude",
+  "geofence_radius_m",
+  "sap_plant",
+  "is_active"
+ ],
+ "fields": [
+  {
+   "fieldname": "station_code",
+   "label": "Station Code",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "station_name",
+   "label": "Station Name",
+   "fieldtype": "Data",
+   "reqd": 1
+  },
+  {
+   "fieldname": "latitude",
+   "label": "Latitude",
+   "fieldtype": "Float",
+   "precision": "6"
+  },
+  {
+   "fieldname": "longitude",
+   "label": "Longitude",
+   "fieldtype": "Float",
+   "precision": "6"
+  },
+  {
+   "fieldname": "geofence_radius_m",
+   "label": "Geofence Radius (m)",
+   "fieldtype": "Int",
+   "default": "250"
+  },
+  {
+   "fieldname": "sap_plant",
+   "label": "SAP Plant",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "is_active",
+   "label": "Active",
+   "fieldtype": "Check",
+   "default": "1"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-26 00:00:00",
+ "modified_by": "Administrator",
+ "module": "Kharj Fuel",
+ "name": "Kharj Station",
+ "owner": "Administrator",
+ "istable": 0,
+ "track_changes": 1,
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Kharj Operator",
+   "write": 1,
+   "create": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "autoname": "field:station_code",
+ "title_field": "station_name"
+}

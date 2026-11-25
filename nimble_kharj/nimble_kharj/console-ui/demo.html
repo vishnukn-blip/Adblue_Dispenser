@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kharj — waybill-authorised AdBlue dispensing</title>
+<style>
+  :root{
+    --page:#ffffff; --card:#ffffff; --sunk:#f8fafc; --line:#e2e8f0; --line2:#cbd5e1;
+    --txt:#0f172a; --dim:#475569; --faint:#64748b; --ghost:#94a3b8;
+    --green:#059669; --green-l:#d1fae5; --amber:#b45309; --amber-l:#fef3c7;
+    --sky:#0284c7; --sky-l:#e0f2fe; --violet:#7c3aed; --rose:#e11d48;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:var(--txt);
+    font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    font-variant-numeric:tabular-nums;padding:24px}
+  .wrap{max-width:1240px;margin:0 auto}
+  .lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+  h1{font-size:24px;font-weight:600;margin:4px 0;letter-spacing:-.01em}
+  header.top{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;
+    align-items:flex-end;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:18px}
+  .sub{color:var(--dim);font-size:13px;margin:0}
+  .status{display:flex;gap:14px;font-family:var(--mono);font-size:12px;color:var(--dim);align-items:center}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--line2);display:inline-block;margin-right:6px}
+  .dot.on{background:var(--green)} .dot.bad{background:var(--rose)}
+
+  .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;
+    border:1px solid var(--line);background:var(--sunk);border-radius:8px;padding:16px;margin-bottom:14px}
+  .truck{display:flex;justify-content:space-between;align-items:center;width:100%;
+    background:none;border:1px solid transparent;border-radius:5px;padding:6px 8px;cursor:pointer;
+    font-family:var(--mono);font-size:12px;color:var(--dim);text-align:left}
+  .truck:hover{background:#fff;border-color:var(--line)}
+  .truck.sel{background:#fff;border-color:var(--line2);color:var(--txt)}
+  .truck b{color:var(--amber);font-weight:500}
+  select,button{font-family:inherit}
+  select{width:100%;background:#fff;border:1px solid var(--line2);color:var(--txt);
+    border-radius:5px;padding:8px;font-family:var(--mono);font-size:12px}
+  .hint{font-size:12px;color:var(--faint);margin:8px 0 0;line-height:1.5}
+  .btn{border-radius:5px;border:1px solid var(--line2);background:#fff;color:var(--dim);
+    padding:8px 12px;font-size:12px;cursor:pointer}
+  .btn:hover{border-color:var(--ghost);color:var(--txt)}
+  .btn.link{width:100%;font-family:var(--mono);border-color:#7dd3fc;background:var(--sky-l);color:#075985}
+  .btn.link.down{border-color:#fcd34d;background:var(--amber-l);color:#92400e}
+  .btn.go{flex:1;background:var(--green);border-color:var(--green);color:#fff;font-weight:600;font-size:13px}
+  .btn.go:hover{background:#047857;color:#fff}
+  .btn.go:disabled{background:#f1f5f9;border-color:var(--line);color:var(--ghost);cursor:not-allowed}
+  .speeds{display:flex;gap:4px}
+  .speeds button{flex:1;background:#fff;border:1px solid var(--line);color:var(--faint);border-radius:5px;
+    padding:6px;font-family:var(--mono);font-size:12px;cursor:pointer}
+  .speeds button.sel{background:var(--txt);border-color:var(--txt);color:#fff}
+
+  .panel{border:1px solid var(--line);background:var(--card);border-radius:8px}
+  .phead{display:flex;align-items:center;gap:8px;padding:11px 16px;border-bottom:1px solid var(--line)}
+  .phead h2{margin:0;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:600;flex:1}
+  .phead .r{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .pbody{padding:16px}
+
+  .gps{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);margin-bottom:14px}
+  .mapwrap{padding:12px;border-right:1px solid var(--line)}
+  svg.map{width:100%;height:auto;display:block;background:var(--sunk);border-radius:6px}
+  .gpsside{padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+  .vrow{border:1px solid var(--line);border-radius:6px;padding:8px 10px}
+  .vrow.sel{border-color:#7dd3fc;background:var(--sky-l)}
+  .vrow .a{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:12px}
+  .vrow .b{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:3px}
+  .pill{font-size:10px;letter-spacing:.08em;padding:2px 6px;border-radius:20px;text-transform:uppercase}
+  .pill.in{background:var(--green-l);color:#065f46} .pill.out{background:#f1f5f9;color:#475569}
+  .alerts{border-top:1px solid var(--line);padding-top:8px;font-family:var(--mono);font-size:11px;
+    max-height:92px;overflow-y:auto}
+  .alerts div{display:flex;gap:8px;padding:2px 0;color:var(--dim)}
+  .alerts .tm{color:var(--ghost);flex:none}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:14px;align-items:start}
+
+  .screen{border:1px solid var(--line);background:var(--sunk);border-radius:6px;padding:14px}
+  .screen .head{display:flex;justify-content:space-between;align-items:center;
+    font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+  .readout{display:flex;align-items:flex-end;gap:16px;margin-top:14px}
+  .litres{font-family:var(--mono);font-size:44px;font-weight:600;line-height:1;color:var(--green)}
+  .meta{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:4px}
+  .meta.b{color:var(--dim);margin-top:9px}
+  .column{position:relative;width:32px;height:124px;border:1px solid var(--line2);
+    background:#fff;border-radius:3px;overflow:hidden}
+  .fill{position:absolute;left:0;right:0;bottom:0;background:#6ee7b7;height:0;transition:height .1s linear}
+  .fill.live{background:var(--green)}
+  .tickline{position:absolute;left:0;right:0;border-top:1px solid var(--line)}
+  .msg{margin:14px 0 0;padding-top:11px;border-top:1px solid var(--line);
+    font-family:var(--mono);font-size:11px;line-height:1.6;color:var(--dim);min-height:34px}
+
+  .waybill{margin-top:12px;border:1px solid #fcd34d;background:#fffbeb;border-radius:6px;padding:12px}
+  .wb-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+  .fo{font-family:var(--mono);font-size:18px;color:var(--amber);margin-top:3px;font-weight:600}
+  .wb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;
+    border-top:1px solid #fde68a;margin-top:11px;padding-top:11px;font-family:var(--mono)}
+  .wb-grid span{display:block;font-size:10px;color:#a16207;letter-spacing:.08em}
+  .wb-grid b{font-size:14px;font-weight:600}
+
+  .check{display:flex;gap:9px;align-items:flex-start;padding:4px 2px}
+  .box{width:14px;height:14px;border:1px solid var(--line2);border-radius:3px;margin-top:3px;flex:none;
+    display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;line-height:1}
+  .box.ok{border-color:var(--green);background:var(--green)}
+  .box.no{border-color:var(--rose);background:var(--rose)}
+  .ctxt{font-size:12px;color:var(--ghost)}
+  .ctxt.ok{color:var(--txt)} .ctxt.no{color:#be123c}
+  .cdet{font-family:var(--mono);font-size:11px;color:var(--faint);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  .kv{border:1px solid var(--line);background:var(--sunk);border-radius:6px;padding:11px;
+    margin-top:14px;font-family:var(--mono);font-size:11px}
+  .kv>div{display:flex;justify-content:space-between;gap:8px;padding:1px 0}
+  .kv span{color:var(--faint)}
+  .kv b{font-weight:500;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  .tape{height:236px;overflow-y:auto;font-family:var(--mono);font-size:11px}
+  .tape .row{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--line)}
+  .tape .t{color:var(--ghost);flex:none} .tape .s{width:118px;flex:none;font-weight:600}
+  .tape .d{color:var(--dim);min-width:0;word-break:break-word}
+  .s.pump{color:var(--green)} .s.cloud{color:var(--sky)} .s.sap{color:var(--violet)}
+  .s.gps{color:var(--txt)} .s.api{color:var(--ghost)} .s.bad{color:var(--rose)}
+  .empty{color:var(--ghost);font-size:12px;line-height:1.6;margin:0}
+
+  .msgcard{border:1px solid var(--line);background:var(--sunk);border-radius:6px;
+    padding:8px 10px;font-family:var(--mono);font-size:11px;margin-bottom:8px}
+  .msgcard .a{display:flex;justify-content:space-between;color:var(--dim);font-weight:600}
+  .msgcard .b{display:flex;justify-content:space-between;color:var(--faint);margin-top:4px;font-weight:400}
+  .msgcard.buf{border-color:#fcd34d;background:#fffbeb} .msgcard.buf .a{color:var(--amber)}
+  .ack{color:var(--green)} .queued{color:var(--amber)} .doc{color:var(--violet)}
+  .foot{color:var(--ghost);font-size:11px;line-height:1.7;margin:20px 0 0}
+  ::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <div class="lbl">Nimble Vision &middot; Almarai KHARJ-01</div>
+      <h1>Waybill-authorised AdBlue dispensing</h1>
+      <p class="sub">One waybill, one source of truth — tracked on GPS, scanned at the pump, validated in the cloud, posted to SAP.</p>
+    </div>
+    <div class="status">
+      <span><i class="dot on"></i>ADB-DU-01</span>
+      <span id="linkState">LINK UP</span>
+      <span>TOT <b id="tot" style="font-weight:600">184203.5</b> L</span>
+    </div>
+  </header>
+
+  <div class="controls">
+    <div>
+      <div class="lbl" style="margin-bottom:8px">Truck at the pump</div>
+      <div id="trucks"></div>
+    </div>
+    <div>
+      <div class="lbl" style="margin-bottom:8px">Scenario</div>
+      <select id="scenario"></select>
+      <p class="hint" id="scenarioHint"></p>
+    </div>
+    <div>
+      <div class="lbl" style="margin-bottom:8px">Cloud link</div>
+      <button class="btn link" id="linkBtn">Cut the link mid-dispense</button>
+      <p class="hint">Cut it while fuel is flowing. The pump finishes, the record buffers, the replay is idempotent.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:space-between">
+      <div>
+        <div class="lbl" style="margin-bottom:8px">Playback</div>
+        <div class="speeds" id="speeds"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn go" id="startBtn">Dispatch to station</button>
+        <button class="btn" id="resetBtn" title="Reset balances and outbox">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <section class="panel gps">
+    <div class="mapwrap">
+      <svg class="map" viewBox="0 0 440 236" id="map" role="img" aria-label="Live fleet positions around the Kharj station geofence"></svg>
+    </div>
+    <div class="gpsside">
+      <div class="lbl">Vehicle GPS &middot; live</div>
+      <div id="vehicles" style="display:flex;flex-direction:column;gap:6px"></div>
+      <div class="lbl" style="margin-top:2px">Geofence alerts</div>
+      <div class="alerts" id="alerts"><div class="idle" style="color:#94a3b8">No transitions yet.</div></div>
+    </div>
+  </section>
+
+  <div class="grid">
+
+    <section class="panel">
+      <div class="phead"><h2>Dispenser ADB-DU-01</h2><span class="r">N1 &middot; AdBlue</span></div>
+      <div class="pbody">
+        <div class="screen">
+          <div class="head"><span id="scrHead" style="color:#475569">Ready</span><i class="dot" id="scrDot"></i></div>
+          <div class="readout">
+            <div style="flex:1">
+              <div class="litres" id="litres">0.00</div>
+              <div class="meta">LITRES DELIVERED</div>
+              <div class="meta b">PRESET <span id="preset">--.--</span> L</div>
+              <div class="meta b" style="margin-top:2px">FLOW <span id="flow">0.0</span> L/MIN</div>
+            </div>
+            <div class="column">
+              <div class="fill" id="fill"></div>
+              <div class="tickline" style="bottom:25%"></div>
+              <div class="tickline" style="bottom:50%"></div>
+              <div class="tickline" style="bottom:75%"></div>
+            </div>
+          </div>
+          <p class="msg" id="scrMsg">Waiting for a vehicle inside the geofence.</p>
+          <button class="btn" id="replayBtn" style="display:none;width:100%;margin-top:12px;background:#f59e0b;border-color:#f59e0b;color:#fff;font-weight:600">Restore link and replay buffer</button>
+        </div>
+
+        <div class="waybill">
+          <div class="wb-top">
+            <div style="min-width:0">
+              <div class="lbl" style="color:#a16207">Waybill &middot; aTOMS barcode</div>
+              <div class="fo" id="wbFo">FO 6101015888</div>
+              <div class="cdet" id="wbVeh" style="color:#a16207"></div>
+              <div class="cdet" id="wbRoute" style="color:#a16207"></div>
+            </div>
+            <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="1.3">
+              <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+              <rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 14h2M14 19h3M19 19h2"/>
+            </svg>
+          </div>
+          <div class="wb-grid">
+            <div><b id="wbEnt" style="color:#0f172a">60.0</b><span>ENTITLED</span></div>
+            <div><b id="wbDisp" style="color:#059669">0.0</b><span>DISPENSED</span></div>
+            <div><b id="wbBal" style="color:#b45309">60.0</b><span>BALANCE</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="phead"><h2>Cloud authorisation</h2><span class="r"><span id="ckCount">0</span>/9</span></div>
+      <div class="pbody">
+        <div id="checks"></div>
+        <div class="kv" id="txnBox" style="display:none">
+          <div><span>TXN</span><b id="txnId"></b></div>
+          <div><span>TOKEN</span><b id="txnTok" style="color:#059669"></b></div>
+          <div><span>IDEMP</span><b id="txnKey"></b></div>
+        </div>
+        <div class="kv">
+          <div class="lbl" style="margin-bottom:6px">GPS fix at authorisation</div>
+          <div><span>COORDS</span><b id="posCoord"></b></div>
+          <div><span>ROAD SPEED</span><b id="posSpeed"></b></div>
+          <div><span>DISTANCE</span><b id="posDist"></b></div>
+          <div><span>FIX AGE</span><b id="posAge">0 s</b></div>
+        </div>
+      </div>
+    </section>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <section class="panel">
+        <div class="phead"><h2>Event tape</h2></div>
+        <div class="pbody">
+          <div class="tape" id="tape"><p class="empty">Idle. Dispatch a truck — GPS arrival, authorisation, flow and the SAP posting all land here.</p></div>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="phead"><h2>SAP outbox</h2><span class="r"><span id="bufCount">0</span> buffered</span></div>
+        <div class="pbody">
+          <div id="outbox"><p class="empty">Nothing queued. Dispensing never waits on SAP — the posting goes to an outbox drained by the scheduler.</p></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <p class="foot">GPS fixes stream continuously; the geofence ring is drawn enlarged for legibility (true radius 250 m). Flow runs at 8&times; real time on a 38 L/min nozzle. Barcodes are generated SAP-side by aTOMS. Endpoints in the tape map 1:1 to <span style="font-family:var(--mono)">nimble_kharj.api.gps</span> and <span style="font-family:var(--mono)">nimble_kharj.api.dispensing</span>.</p>
+</div>
+
+<script>
+var STATION={code:"KHARJ-01",lat:24.1554,lng:47.3346,fence:250};
+var UNIT={id:"ADB-DU-01",product:"AdBlue",flow:38};
+var ACCEL=8;
+var BOX={lat0:24.080,lat1:24.230,lng0:47.190,lng1:47.480};
+var W=440,H=236;
+
+var TRUCKS=[
+ {id:"ALM-TRK-1041",fo:"6101015888",plate:"8412 KHA",imei:"356938035643809",ent:60,
+  lat:24.1720,lng:47.3610,kmh:56,route:"Kharj DC \u2192 Riyadh North",
+  loop:[[24.1720,47.3610],[24.1930,47.3980],[24.1660,47.4240],[24.1400,47.3820]]},
+ {id:"ALM-TRK-1082",fo:"6101015999",plate:"3927 RSH",imei:"356938035643810",ent:45,
+  lat:24.2119,lng:47.4017,kmh:48,route:"Kharj DC \u2192 Dammam",
+  loop:[[24.2119,47.4017],[24.2200,47.3300],[24.1980,47.2600],[24.1620,47.2450]]},
+ {id:"ALM-TRK-1119",fo:"6101015777",plate:"6650 JDH",imei:"356938035643811",ent:75,
+  lat:24.0983,lng:47.2765,kmh:62,route:"Kharj DC \u2192 Jeddah",
+  loop:[[24.0983,47.2765],[24.1150,47.2300],[24.1500,47.2200],[24.1750,47.2600]]}];
+
+var SCENARIOS=[
+ {id:"normal",label:"Clean dispense",hint:"Right truck, valid waybill, balance available"},
+ {id:"wrong_vehicle",label:"Wrong truck at the pump",hint:"Waybill presented from ALM-TRK-1119"},
+ {id:"expired",label:"Expired waybill",hint:"Validity window closed 4 h ago"},
+ {id:"exhausted",label:"Entitlement used up",hint:"Balance already at 0 L"}];
+
+var CHECKS=[
+ ["WB_FOUND","Waybill resolved from barcode"],["WB_STATUS","Waybill open for dispensing"],
+ ["WB_WINDOW","Inside validity window"],["PROD_MATCH","Product matches nozzle"],
+ ["VEH_MATCH","Vehicle matches waybill"],["STN_MATCH","Station authorised on waybill"],
+ ["ENTITLEMENT","Entitlement balance available"],["GEOFENCE","Vehicle inside station geofence"],
+ ["NO_OPEN_TXN","No transaction already in progress"]];
+
+var SCREEN={
+ idle:["Ready","#475569","Waiting for a vehicle inside the geofence."],
+ approach:["Vehicle inbound","#0284c7","Tracking the truck to the forecourt on GPS."],
+ arriving:["Vehicle detected","#0284c7","Geofence entry logged. Scanner armed."],
+ scanning:["Reading barcode","#b45309","aTOMS barcode captured, sending to the cloud."],
+ validating:["Validating","#0284c7","Checking the waybill against the freight order and entitlement."],
+ authorised:["Authorised","#059669","Pump released. Lift the nozzle to start."],
+ dispensing:["Dispensing","#059669","Metering AdBlue against the authorised preset."],
+ buffered:["Held locally","#b45309","Delivery finished with the link down. The record is safe on the unit."],
+ completing:["Posting","#0284c7","Writing the delivery against the waybill balance."],
+ posting:["Reconciling","#7c3aed","Dispense posting queued for SAP."],
+ done:["Complete","#059669","Delivered, posted and reconciled. Waybill balance updated."],
+ rejected:["Rejected","#e11d48",""]};
+
+var truckIdx=0,scenario="normal",online=true,speed=1,phase="idle";
+var balances={},litres=0,preset=0,txn=null,buffer=[],outbox=[],totalizer=184203.5;
+var checkState=[],timers=[],flowTimer=null,linkCut=false,fixAge=0;
+var fleet=TRUCKS.map(function(t){return {lat:t.lat,lng:t.lng,kmh:t.kmh,wp:1,state:"Outside",
+  trail:[[t.lat,t.lng]],inbound:false};});
+TRUCKS.forEach(function(t){balances[t.fo]=t.ent;});
+
+function $(id){return document.getElementById(id);}
+function hex(n){var s="";for(var i=0;i<n;i++)s+="0123456789ABCDEF"[Math.floor(Math.random()*16)];return s;}
+function clock(){return new Date().toLocaleTimeString("en-GB",{hour12:false});}
+function truck(){return TRUCKS[truckIdx];}
+function presentIdx(){return scenario==="wrong_vehicle"?2:truckIdx;}
+function presenting(){return TRUCKS[presentIdx()];}
+function running(){return ["idle","done","rejected"].indexOf(phase)===-1;}
+function at(ms,fn){timers.push(setTimeout(fn,ms/speed));}
+function clearAll(){timers.forEach(clearTimeout);timers=[];if(flowTimer){clearInterval(flowTimer);flowTimer=null;}}
+
+function metres(la1,lo1,la2,lo2){
+  var R=6371000,r=Math.PI/180,p1=la1*r,p2=la2*r;
+  var a=Math.pow(Math.sin((p2-p1)/2),2)+Math.cos(p1)*Math.cos(p2)*Math.pow(Math.sin((lo2-lo1)*r/2),2);
+  return 2*R*Math.asin(Math.sqrt(a));
+}
+function px(la,lo){
+  return [(lo-BOX.lng0)/(BOX.lng1-BOX.lng0)*W,(1-(la-BOX.lat0)/(BOX.lat1-BOX.lat0))*H];
+}
+
+function drawMap(){
+  var st=px(STATION.lat,STATION.lng),sx=st[0],sy=st[1],s="",i;
+  for(i=1;i<6;i++)s+='<line x1="0" y1="'+(i*H/6)+'" x2="'+W+'" y2="'+(i*H/6)+'" stroke="#eef2f7"/>';
+  for(i=1;i<10;i++)s+='<line x1="'+(i*W/10)+'" y1="0" x2="'+(i*W/10)+'" y2="'+H+'" stroke="#eef2f7"/>';
+
+  fleet.forEach(function(f,i){
+    if(f.trail.length<2)return;
+    var pts=f.trail.map(function(p){var q=px(p[0],p[1]);return q[0].toFixed(1)+","+q[1].toFixed(1);}).join(" ");
+    s+='<polyline points="'+pts+'" fill="none" stroke="'+(i===presentIdx()?"#7dd3fc":"#e2e8f0")+
+       '" stroke-width="1.4" stroke-dasharray="3 3"/>';
+  });
+
+  s+='<circle cx="'+sx+'" cy="'+sy+'" r="17" fill="#d1fae5" stroke="#059669" stroke-width="1" stroke-dasharray="3 3"/>';
+  s+='<rect x="'+(sx-5)+'" y="'+(sy-5)+'" width="10" height="10" rx="2" fill="#059669"/>';
+  s+='<text x="'+(sx+22)+'" y="'+(sy-6)+'" font-family="ui-monospace,monospace" font-size="9" fill="#065f46">KHARJ-01</text>';
+  s+='<text x="'+(sx+22)+'" y="'+(sy+5)+'" font-family="ui-monospace,monospace" font-size="8" fill="#059669">geofence 250 m</text>';
+
+  fleet.forEach(function(f,i){
+    var p=px(f.lat,f.lng),x=p[0],y=p[1],sel=i===presentIdx();
+    var col=f.state==="Inside"?"#059669":(sel?"#0284c7":"#64748b");
+    s+='<rect x="'+(x-4)+'" y="'+(y-4)+'" width="8" height="8" rx="1.5" fill="'+col+'"/>';
+    if(sel)s+='<circle cx="'+x+'" cy="'+y+'" r="9" fill="none" stroke="'+col+'" stroke-width="1" opacity="0.5"/>';
+    var right=x>W-92,anchor=right?"end":"start",dx=right?-9:9;
+    s+='<text x="'+(x+dx)+'" y="'+(y-3)+'" text-anchor="'+anchor+'" font-family="ui-monospace,monospace" font-size="8.5" fill="#0f172a">'+TRUCKS[i].id.slice(-4)+'</text>';
+    s+='<text x="'+(x+dx)+'" y="'+(y+7)+'" text-anchor="'+anchor+'" font-family="ui-monospace,monospace" font-size="8" fill="#64748b">'+Math.round(f.kmh)+' km/h</text>';
+  });
+  $("map").innerHTML=s;
+}
+
+function fmtDist(d){return d<1000?Math.round(d)+" m":(d/1000).toFixed(1)+" km";}
+
+function renderVehicles(){
+  $("vehicles").innerHTML=fleet.map(function(f,i){
+    var d=metres(f.lat,f.lng,STATION.lat,STATION.lng);
+    return '<div class="vrow'+(i===presentIdx()?" sel":"")+'">'+
+      '<div class="a"><span>'+TRUCKS[i].id+'</span><span class="pill '+(f.state==="Inside"?"in":"out")+'">'+f.state+'</span></div>'+
+      '<div class="b"><span>'+f.lat.toFixed(4)+'\u00b0N '+f.lng.toFixed(4)+'\u00b0E</span><span>'+Math.round(f.kmh)+' km/h</span></div>'+
+      '<div class="b"><span>IMEI \u2026'+TRUCKS[i].imei.slice(-6)+'</span><span>'+fmtDist(d)+' to station</span></div></div>';
+  }).join("");
+  var f=fleet[presentIdx()];
+  $("posCoord").textContent=f.lat.toFixed(4)+"\u00b0 N "+f.lng.toFixed(4)+"\u00b0 E";
+  $("posSpeed").textContent=Math.round(f.kmh)+" km/h";
+  $("posDist").textContent=fmtDist(metres(f.lat,f.lng,STATION.lat,STATION.lng))+" from centre";
+}
+
+function alertLine(text){
+  var el=$("alerts"),idle=el.querySelector(".idle");
+  if(idle)el.innerHTML="";
+  var d=document.createElement("div");
+  d.innerHTML='<span class="tm"></span><span></span>';
+  d.children[0].textContent=clock();d.children[1].textContent=text;
+  el.insertBefore(d,el.firstChild);
+  while(el.children.length>12)el.removeChild(el.lastChild);
+}
+
+function say(state,detail,src){
+  var tape=$("tape");
+  if(tape.querySelector(".empty"))tape.innerHTML="";
+  var row=document.createElement("div");
+  row.className="row";
+  row.innerHTML='<span class="t"></span><span class="s '+src+'"></span><span class="d"></span>';
+  row.children[0].textContent=clock();row.children[1].textContent=state;row.children[2].textContent=detail;
+  tape.appendChild(row);tape.scrollTop=tape.scrollHeight;
+}
+
+setInterval(function(){
+  fleet.forEach(function(f,i){
+    var t=TRUCKS[i],tgt,gain;
+    if(f.inbound){tgt=[STATION.lat,STATION.lng];gain=0.26;}
+    else{tgt=t.loop[f.wp];gain=0.035;}
+    var dist=metres(f.lat,f.lng,tgt[0],tgt[1]);
+    f.lat+=(tgt[0]-f.lat)*gain;f.lng+=(tgt[1]-f.lng)*gain;
+
+    if(f.inbound){
+      var dS0=metres(f.lat,f.lng,STATION.lat,STATION.lng);
+      f.kmh=dS0<400?Math.max(3,dS0/40):Math.min(t.kmh,dS0/90);
+    }else{
+      f.kmh=Math.max(28,Math.min(92,f.kmh+(Math.random()-0.5)*7));
+      if(dist<900)f.wp=(f.wp+1)%t.loop.length;
+    }
+
+    f.trail.push([f.lat,f.lng]);
+    if(f.trail.length>26)f.trail.shift();
+
+    var dS=metres(f.lat,f.lng,STATION.lat,STATION.lng);
+    var next=dS<=STATION.fence?"Inside":"Outside";
+    if(next!==f.state){
+      f.state=next;
+      var kind=next==="Inside"?"Entry":"Exit";
+      alertLine(t.id+" \u2014 geofence "+kind.toLowerCase()+" @ "+Math.round(dS)+" m");
+      say("GEOFENCE_"+kind.toUpperCase(),t.id+" \u00b7 "+Math.round(dS)+" m from centre \u00b7 "+Math.round(f.kmh)+" km/h","gps");
+      if(kind==="Entry"&&f.inbound){f.inbound=false;f.kmh=0;onArrival();}
+    }
+  });
+  fixAge=0;drawMap();renderVehicles();
+},700);
+
+setInterval(function(){fixAge++;$("posAge").textContent=fixAge+" s";},1000);
+
+function evaluate(code){
+  var t=truck(),p=presenting(),bal=balances[t.fo],f=fleet[presentIdx()];
+  var d=Math.round(metres(f.lat,f.lng,STATION.lat,STATION.lng));
+  if(code==="WB_FOUND")return[1,"Waybill "+t.fo];
+  if(code==="WB_STATUS")return[1,scenario==="exhausted"?"Status: Partially Dispensed":"Status: Open"];
+  if(code==="WB_WINDOW")return scenario==="expired"?[0,"Validity window closed 4 h 12 m ago"]:[1,"Valid until tomorrow 18:00"];
+  if(code==="PROD_MATCH")return[1,"AdBlue vs "+UNIT.product];
+  if(code==="VEH_MATCH")return p.id===t.id?[1,"At pump "+p.id]:[0,"At pump "+p.id+" / on waybill "+t.id];
+  if(code==="STN_MATCH")return[1,STATION.code];
+  if(code==="ENTITLEMENT")return(scenario==="exhausted"||bal<=0.01)
+    ?[0,"0.00 L of "+t.ent.toFixed(2)+" L remaining"]
+    :[1,bal.toFixed(2)+" L of "+t.ent.toFixed(2)+" L remaining"];
+  if(code==="GEOFENCE")return f.state==="Inside"
+    ?[1,d+" m from centre, fix "+fixAge+" s old"]
+    :[0,d+" m from centre \u2014 outside the fence"];
+  return[1,"None open"];
+}
+
+function renderControls(){
+  $("trucks").innerHTML="";
+  TRUCKS.forEach(function(t,i){
+    var b=document.createElement("button");
+    b.className="truck"+(i===truckIdx?" sel":"");
+    b.innerHTML='<span>'+t.id+'</span><b>FO '+t.fo+'</b>';
+    b.onclick=function(){if(running())return;truckIdx=i;reset(false);};
+    $("trucks").appendChild(b);
+  });
+  $("scenario").innerHTML=SCENARIOS.map(function(s){return '<option value="'+s.id+'">'+s.label+'</option>';}).join("");
+  $("scenario").value=scenario;
+  $("scenarioHint").textContent=SCENARIOS.filter(function(s){return s.id===scenario;})[0].hint;
+  $("speeds").innerHTML=[1,2,4].map(function(s){return '<button data-s="'+s+'" class="'+(s===speed?"sel":"")+'">'+s+'\u00d7</button>';}).join("");
+  Array.prototype.forEach.call($("speeds").querySelectorAll("button"),function(b){
+    b.onclick=function(){speed=+b.dataset.s;renderControls();};});
+  $("startBtn").disabled=running();
+}
+
+function renderChecks(){
+  $("checks").innerHTML=CHECKS.map(function(c){
+    var r=null;
+    checkState.forEach(function(x){if(x[0]===c[0])r=x;});
+    var cls=r?(r[1]?"ok":"no"):"";
+    return '<div class="check"><span class="box '+cls+'">'+(r?(r[1]?"\u2713":"\u2715"):"")+'</span>'+
+      '<div style="min-width:0;flex:1"><div class="ctxt '+cls+'">'+c[1]+'</div>'+
+      (r?'<div class="cdet">'+r[2]+'</div>':'')+'</div></div>';
+  }).join("");
+  $("ckCount").textContent=checkState.length;
+}
+
+function renderWaybill(){
+  var t=truck(),bal=balances[t.fo];
+  $("wbFo").textContent="FO "+t.fo;
+  $("wbVeh").textContent=t.id+" \u00b7 "+t.plate;
+  $("wbRoute").textContent=t.route;
+  $("wbEnt").textContent=t.ent.toFixed(1);
+  $("wbDisp").textContent=(t.ent-bal).toFixed(1);
+  $("wbBal").textContent=bal.toFixed(1);
+}
+
+function renderOutbox(){
+  var el=$("outbox");
+  $("bufCount").textContent=buffer.length;
+  if(!buffer.length&&!outbox.length){
+    el.innerHTML='<p class="empty">Nothing queued. Dispensing never waits on SAP — the posting goes to an outbox drained by the scheduler.</p>';return;}
+  el.innerHTML=buffer.map(function(b){
+    return '<div class="msgcard buf"><div class="a"><span>LOCAL CACHE</span><span>'+b.qty.toFixed(2)+' L</span></div>'+
+      '<div class="b"><span>FO '+b.fo+'</span><span>awaiting link</span></div></div>';}).join("")
+   +outbox.map(function(m){
+    return '<div class="msgcard"><div class="a"><span>'+m.id+'</span><span class="'+(m.state==="Acknowledged"?"ack":"queued")+'">'+m.state+'</span></div>'+
+      '<div class="b"><span>FO '+m.fo+' \u00b7 '+m.qty.toFixed(2)+' L'+(m.replayed?" \u00b7 replayed":"")+'</span>'+
+      (m.docNo?'<span class="doc">'+m.docNo+'</span>':'')+'</div></div>';}).join("");
+}
+
+function setPhase(p){
+  phase=p;
+  var s=SCREEN[p];
+  $("scrHead").textContent=s[0];$("scrHead").style.color=s[1];
+  $("scrMsg").textContent=p==="rejected"?($("scrMsg").dataset.reject||""):s[2];
+  $("scrDot").className="dot"+(running()?" on":"")+(p==="rejected"?" bad":"");
+  $("replayBtn").style.display=p==="buffered"?"block":"none";
+  $("startBtn").disabled=running();
+  $("fill").className="fill"+(p==="dispensing"?" live":"");
+}
+
+function setLitres(v){
+  litres=v;$("litres").textContent=v.toFixed(2);
+  $("fill").style.height=(preset?Math.min(100,v/preset*100):0)+"%";
+}
+
+function reset(hard){
+  clearAll();linkCut=false;
+  fleet.forEach(function(f){f.inbound=false;});
+  checkState=[];litres=0;preset=0;txn=null;buffer=[];
+  $("txnBox").style.display="none";$("preset").textContent="--.--";$("flow").textContent="0.0";
+  $("tape").innerHTML='<p class="empty">Idle. Dispatch a truck — GPS arrival, authorisation, flow and the SAP posting all land here.</p>';
+  if(hard){TRUCKS.forEach(function(t){balances[t.fo]=t.ent;});outbox=[];totalizer=184203.5;
+    $("tot").textContent=totalizer.toFixed(1);}
+  setLitres(0);setPhase("idle");renderChecks();renderWaybill();renderOutbox();renderControls();renderVehicles();
+}
+
+function start(){
+  clearAll();checkState=[];litres=0;txn=null;
+  $("txnBox").style.display="none";$("flow").textContent="0.0";
+  $("tape").innerHTML="";setLitres(0);renderChecks();
+  var p=presenting(),f=fleet[presentIdx()];
+  f.inbound=true;f.trail=[[f.lat,f.lng]];
+  setPhase("approach");
+  say("DISPATCHED",p.id+" routed to "+STATION.code+" \u00b7 tracking IMEI "+p.imei,"gps");
+  say("POST","gps.ingest_batch \u00b7 fixes streaming","api");
+}
+
+function onArrival(){
+  if(phase!=="approach")return;
+  var t=truck(),p=presenting();
+  setPhase("arriving");
+  say("ARRIVED",p.id+" parked on the forecourt \u00b7 ignition off","gps");
+  at(700,function(){
+    setPhase("scanning");
+    say("SCANNED","aTOMS barcode "+t.fo+" read at "+UNIT.id,"pump");
+    say("POST","dispensing.scan","api");
+    setPhase("validating");
+  });
+  CHECKS.forEach(function(c,i){
+    at(1000+i*230,function(){
+      var r=evaluate(c[0]);checkState.push([c[0],r[0],r[1]]);renderChecks();});
+  });
+  at(1000+CHECKS.length*230+350,decide);
+}
+
+function decide(){
+  var t=truck(),bad=null;
+  CHECKS.forEach(function(c){
+    if(bad)return;
+    var r=evaluate(c[0]);
+    if(!r[0])bad=[c[0],c[1],r];
+  });
+  if(bad){
+    var reason=bad[1]+" \u2014 "+bad[2][1];
+    $("scrMsg").dataset.reject=reason;setPhase("rejected");
+    say("REJECTED",bad[0]+": "+bad[2][1],"bad");
+    say("PUMP_LOCKED","Nozzle not released. Rejection written to the audit trail.","pump");
+    return;
+  }
+  var bal=balances[t.fo];
+  preset=Math.min(bal,Math.round((bal*0.72+4)*10)/10);
+  $("preset").textContent=preset.toFixed(2);
+  txn={id:"KHRJ-TXN-2026-"+(Math.floor(Math.random()*90000)+10000),tok:hex(16),
+       key:UNIT.id+"-"+hex(12).toLowerCase(),qty:preset,fo:t.fo};
+  $("txnId").textContent=txn.id;$("txnTok").textContent=txn.tok;$("txnKey").textContent=txn.key;
+  $("txnBox").style.display="block";
+  setPhase("authorised");
+  say("POST","dispensing.authorise","api");
+  say("AUTHORISED",txn.id+" \u00b7 token "+txn.tok+" \u00b7 preset "+preset.toFixed(2)+" L \u00b7 pump released","cloud");
+  at(900,function(){setPhase("dispensing");say("DISPENSING","Nozzle lifted, flow detected","pump");runFlow();});
+}
+
+function runFlow(){
+  var tick=110,per=(UNIT.flow/60)*(tick/1000)*ACCEL;
+  flowTimer=setInterval(function(){
+    if(!online&&!linkCut){linkCut=true;
+      say("LINK_DOWN","Cloud unreachable \u2014 writing to local cache, pump keeps running","pump");}
+    $("flow").textContent=(UNIT.flow*(0.95+Math.random()*0.1)).toFixed(1);
+    var next=Math.min(preset,litres+per*(0.94+Math.random()*0.12));
+    setLitres(next);
+    if(next>=preset-0.005){clearInterval(flowTimer);flowTimer=null;$("flow").textContent="0.0";finish();}
+  },tick/speed);
+}
+
+function finish(){
+  var f=fleet[presentIdx()];
+  say("NOZZLE_STOWED",preset.toFixed(2)+" L delivered \u00b7 fix "+f.lat.toFixed(4)+", "+f.lng.toFixed(4)+" stamped on the transaction","pump");
+  totalizer+=preset;$("tot").textContent=totalizer.toFixed(1);
+  if(!online){
+    setPhase("buffered");buffer=[{key:txn.key,fo:txn.fo,qty:preset}];renderOutbox();
+    say("BUFFERED","1 record held on "+UNIT.id+" \u00b7 idempotency key "+txn.key,"pump");return;}
+  post(preset,false);
+}
+
+function post(qty,replayed){
+  setPhase("completing");say("POST","dispensing.complete","api");
+  at(500,function(){
+    var t=truck(),rem=Math.max(0,balances[t.fo]-qty);
+    balances[t.fo]=rem;renderWaybill();
+    say("WAYBILL_POSTED","FO "+t.fo+" balance "+rem.toFixed(2)+" L \u00b7 status "+(rem<=0.01?"Closed":"Partially Dispensed"),"cloud");
+    var msg={id:"MSG-"+hex(6),fo:t.fo,qty:qty,state:"Queued",replayed:replayed,docNo:null};
+    outbox=[msg].concat(outbox).slice(0,6);renderOutbox();
+    say("SAP_QUEUED","Outbox "+msg.id+" \u00b7 dispense posting with GPS stamp","sap");
+    setPhase("posting");
+    at(1300,function(){
+      msg.state="Acknowledged";msg.docNo="49"+hex(8);renderOutbox();
+      say("SAP_POSTED","SAP document "+msg.docNo+" \u00b7 transaction Reconciled","sap");
+      setPhase("done");});
+  });
+}
+
+function paintLink(){
+  $("linkBtn").textContent=online?"Cut the link mid-dispense":"Link is down \u2014 buffering";
+  $("linkBtn").className="btn link"+(online?"":" down");
+  $("linkState").textContent=online?"LINK UP":"LINK DOWN";
+  $("linkState").style.color=online?"#475569":"#b45309";
+}
+
+$("startBtn").onclick=start;
+$("resetBtn").onclick=function(){reset(true);};
+$("scenario").onchange=function(e){scenario=e.target.value;reset(false);};
+$("linkBtn").onclick=function(){online=!online;paintLink();};
+$("replayBtn").onclick=function(){
+  online=true;paintLink();
+  say("LINK_UP","Cloud reachable \u2014 replaying 1 buffered record","pump");
+  at(700,function(){
+    say("POST","dispensing.sync_offline_batch","api");
+    say("IDEMPOTENT","Key "+buffer[0].key+" not seen before \u2014 accepted once","cloud");
+    var qty=buffer[0].qty;buffer=[];renderOutbox();post(qty,true);});
+};
+
+paintLink();reset(true);drawMap();
+</script>
+</body>
+</html>

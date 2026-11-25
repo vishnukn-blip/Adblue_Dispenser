@@ -1,0 +1,286 @@
+{
+ "actions": [],
+ "creation": "2026-08-26 00:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "idempotency_key",
+  "waybill",
+  "vehicle",
+  "dispensing_unit",
+  "nozzle",
+  "product",
+  "cb1",
+  "status",
+  "authorised_qty",
+  "dispensed_qty",
+  "flow_rate_lpm",
+  "totalizer_start",
+  "totalizer_end",
+  "sec_time",
+  "scanned_at",
+  "authorised_at",
+  "started_at",
+  "completed_at",
+  "cb2",
+  "auth_token",
+  "captured_offline",
+  "synced_at",
+  "sec_geo",
+  "latitude",
+  "longitude",
+  "geofence_ok",
+  "rejection_reason",
+  "validation_trace",
+  "sec_sap",
+  "sap_status",
+  "sap_document_no",
+  "sec_events",
+  "events"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "label": "Series",
+   "fieldtype": "Select",
+   "options": "KHRJ-TXN-.YYYY.-.#####",
+   "default": "KHRJ-TXN-.YYYY.-.#####",
+   "hidden": 1
+  },
+  {
+   "fieldname": "idempotency_key",
+   "label": "Idempotency Key",
+   "fieldtype": "Data",
+   "unique": 1,
+   "read_only": 1,
+   "description": "Generated on the dispenser. Guarantees replay-safe sync after an offline window."
+  },
+  {
+   "fieldname": "waybill",
+   "label": "Waybill",
+   "fieldtype": "Link",
+   "options": "Kharj Waybill",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "vehicle",
+   "label": "Vehicle",
+   "fieldtype": "Link",
+   "options": "Kharj Fleet Vehicle",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "dispensing_unit",
+   "label": "Dispensing Unit",
+   "fieldtype": "Link",
+   "options": "Kharj Dispensing Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "nozzle",
+   "label": "Nozzle",
+   "fieldtype": "Int",
+   "default": "1"
+  },
+  {
+   "fieldname": "product",
+   "label": "Product",
+   "fieldtype": "Select",
+   "options": "AdBlue\nDiesel",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb1",
+   "label": "",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "label": "Status",
+   "fieldtype": "Select",
+   "options": "Rejected\nAuthorised\nDispensing\nCompleted\nAborted\nReconciled",
+   "default": "Authorised",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "authorised_qty",
+   "label": "Authorised Qty (L)",
+   "fieldtype": "Float"
+  },
+  {
+   "fieldname": "dispensed_qty",
+   "label": "Dispensed Qty (L)",
+   "fieldtype": "Float",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "flow_rate_lpm",
+   "label": "Flow Rate (L/min)",
+   "fieldtype": "Float",
+   "read_only": 1
+  },
+  {
+   "fieldname": "totalizer_start",
+   "label": "Totalizer Start",
+   "fieldtype": "Float"
+  },
+  {
+   "fieldname": "totalizer_end",
+   "label": "Totalizer End",
+   "fieldtype": "Float"
+  },
+  {
+   "fieldname": "sec_time",
+   "label": "Timing",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "scanned_at",
+   "label": "Scanned At",
+   "fieldtype": "Datetime"
+  },
+  {
+   "fieldname": "authorised_at",
+   "label": "Authorised At",
+   "fieldtype": "Datetime"
+  },
+  {
+   "fieldname": "started_at",
+   "label": "Started At",
+   "fieldtype": "Datetime"
+  },
+  {
+   "fieldname": "completed_at",
+   "label": "Completed At",
+   "fieldtype": "Datetime"
+  },
+  {
+   "fieldname": "cb2",
+   "label": "",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "auth_token",
+   "label": "Auth Token",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "captured_offline",
+   "label": "Captured Offline",
+   "fieldtype": "Check",
+   "default": "0"
+  },
+  {
+   "fieldname": "synced_at",
+   "label": "Synced At",
+   "fieldtype": "Datetime",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sec_geo",
+   "label": "Position & Validation",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "latitude",
+   "label": "Latitude",
+   "fieldtype": "Float",
+   "precision": "6"
+  },
+  {
+   "fieldname": "longitude",
+   "label": "Longitude",
+   "fieldtype": "Float",
+   "precision": "6"
+  },
+  {
+   "fieldname": "geofence_ok",
+   "label": "Inside Geofence",
+   "fieldtype": "Check",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rejection_reason",
+   "label": "Rejection Reason",
+   "fieldtype": "Small Text",
+   "read_only": 1
+  },
+  {
+   "fieldname": "validation_trace",
+   "label": "Validation Trace",
+   "fieldtype": "Code",
+   "options": "JSON",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sec_sap",
+   "label": "SAP",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "sap_status",
+   "label": "SAP Status",
+   "fieldtype": "Select",
+   "options": "Not Posted\nQueued\nPosted\nFailed",
+   "default": "Not Posted",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sap_document_no",
+   "label": "SAP Document No",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sec_events",
+   "label": "Event Trace",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "events",
+   "label": "Events",
+   "fieldtype": "Table",
+   "options": "Kharj Dispense Event"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-26 00:00:00",
+ "modified_by": "Administrator",
+ "module": "Kharj Fuel",
+ "name": "Kharj Dispense Transaction",
+ "owner": "Administrator",
+ "istable": 0,
+ "track_changes": 1,
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Kharj Operator",
+   "write": 1,
+   "create": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "autoname": "naming_series:",
+ "title_field": "waybill"
+}

@@ -1,0 +1,129 @@
+{
+ "actions": [],
+ "creation": "2026-08-26 00:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "unit_id",
+  "station",
+  "product",
+  "nozzle_count",
+  "firmware_version",
+  "cb1",
+  "status",
+  "last_heartbeat",
+  "totalizer_l",
+  "buffered_records",
+  "api_key_hash"
+ ],
+ "fields": [
+  {
+   "fieldname": "unit_id",
+   "label": "Unit ID",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "station",
+   "label": "Station",
+   "fieldtype": "Link",
+   "options": "Kharj Station",
+   "reqd": 1
+  },
+  {
+   "fieldname": "product",
+   "label": "Product",
+   "fieldtype": "Select",
+   "options": "AdBlue\nDiesel",
+   "default": "AdBlue"
+  },
+  {
+   "fieldname": "nozzle_count",
+   "label": "Nozzles",
+   "fieldtype": "Int",
+   "default": "1"
+  },
+  {
+   "fieldname": "firmware_version",
+   "label": "Firmware",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "cb1",
+   "label": "",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "label": "Status",
+   "fieldtype": "Select",
+   "options": "Online\nOffline\nMaintenance",
+   "default": "Offline",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "last_heartbeat",
+   "label": "Last Heartbeat",
+   "fieldtype": "Datetime",
+   "read_only": 1
+  },
+  {
+   "fieldname": "totalizer_l",
+   "label": "Totalizer (L)",
+   "fieldtype": "Float",
+   "read_only": 1
+  },
+  {
+   "fieldname": "buffered_records",
+   "label": "Buffered Records",
+   "fieldtype": "Int",
+   "read_only": 1,
+   "description": "Transactions held in the unit's local cache while the cloud link is down"
+  },
+  {
+   "fieldname": "api_key_hash",
+   "label": "Device Key Hash",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "hidden": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-26 00:00:00",
+ "modified_by": "Administrator",
+ "module": "Kharj Fuel",
+ "name": "Kharj Dispensing Unit",
+ "owner": "Administrator",
+ "istable": 0,
+ "track_changes": 1,
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Kharj Operator",
+   "write": 1,
+   "create": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "autoname": "field:unit_id",
+ "title_field": "unit_id"
+}

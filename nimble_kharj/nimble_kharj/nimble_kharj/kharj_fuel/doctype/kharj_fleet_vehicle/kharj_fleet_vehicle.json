@@ -1,0 +1,183 @@
+{
+ "actions": [],
+ "creation": "2026-08-26 00:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "vehicle_no",
+  "plate_no",
+  "sap_equipment_no",
+  "vehicle_type",
+  "gps_device_id",
+  "gps_vendor",
+  "driver_name",
+  "driver_id",
+  "adblue_tank_capacity",
+  "diesel_tank_capacity",
+  "sec_telemetry",
+  "last_latitude",
+  "last_longitude",
+  "last_speed_kmph",
+  "last_heading",
+  "geofence_state",
+  "odometer_km",
+  "last_ping_at",
+  "is_active"
+ ],
+ "fields": [
+  {
+   "fieldname": "vehicle_no",
+   "label": "Vehicle No",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "plate_no",
+   "label": "Plate No",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "sap_equipment_no",
+   "label": "SAP Equipment No",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "vehicle_type",
+   "label": "Vehicle Type",
+   "fieldtype": "Select",
+   "options": "Tractor Trailer\nRigid Truck\nTanker\nLCV",
+   "default": "Tractor Trailer"
+  },
+  {
+   "fieldname": "gps_device_id",
+   "label": "GPS Device ID / IMEI",
+   "fieldtype": "Data",
+   "unique": 1,
+   "description": "Tracker identifier the vendor pushes in its webhook payload"
+  },
+  {
+   "fieldname": "gps_vendor",
+   "label": "GPS Vendor",
+   "fieldtype": "Select",
+   "options": "NV50 Edge\nTeltonika\nTraccar\nWialon\nOther",
+   "default": "NV50 Edge"
+  },
+  {
+   "fieldname": "driver_name",
+   "label": "Driver",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "driver_id",
+   "label": "Driver ID",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "adblue_tank_capacity",
+   "label": "AdBlue Tank Capacity (L)",
+   "fieldtype": "Float",
+   "default": "60"
+  },
+  {
+   "fieldname": "diesel_tank_capacity",
+   "label": "Diesel Tank Capacity (L)",
+   "fieldtype": "Float",
+   "default": "400"
+  },
+  {
+   "fieldname": "sec_telemetry",
+   "label": "Last Known Position",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "last_latitude",
+   "label": "Last Latitude",
+   "fieldtype": "Float",
+   "precision": "6",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_longitude",
+   "label": "Last Longitude",
+   "fieldtype": "Float",
+   "precision": "6",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_speed_kmph",
+   "label": "Last Speed (km/h)",
+   "fieldtype": "Float",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_heading",
+   "label": "Last Heading",
+   "fieldtype": "Float",
+   "read_only": 1
+  },
+  {
+   "fieldname": "geofence_state",
+   "label": "Geofence State",
+   "fieldtype": "Select",
+   "options": "Outside\nInside",
+   "default": "Outside",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "odometer_km",
+   "label": "GPS Odometer (km)",
+   "fieldtype": "Float",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_ping_at",
+   "label": "Last Ping",
+   "fieldtype": "Datetime",
+   "read_only": 1
+  },
+  {
+   "fieldname": "is_active",
+   "label": "Active",
+   "fieldtype": "Check",
+   "default": "1"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-26 00:00:00",
+ "modified_by": "Administrator",
+ "module": "Kharj Fuel",
+ "name": "Kharj Fleet Vehicle",
+ "owner": "Administrator",
+ "istable": 0,
+ "track_changes": 1,
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Kharj Operator",
+   "write": 1,
+   "create": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "autoname": "field:vehicle_no",
+ "title_field": "vehicle_no"
+}

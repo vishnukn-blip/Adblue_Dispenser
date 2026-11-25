@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Temporary Word / Office files
+~$*
+
+# Environment and secrets
+.env
+.env.local
+
+# IDE & Editor folders
+.vscode/
+.idea/
+.agents/
+
+# Logs
+*.log

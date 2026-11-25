@@ -1,0 +1,172 @@
+{
+ "actions": [],
+ "creation": "2026-08-26 00:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "waybill_no",
+  "barcode_payload",
+  "freight_order",
+  "vehicle",
+  "station",
+  "cb1",
+  "product",
+  "entitlement_qty",
+  "dispensed_qty",
+  "balance_qty",
+  "valid_from",
+  "valid_to",
+  "sec_status",
+  "status",
+  "route",
+  "trip_start",
+  "sap_sync_status"
+ ],
+ "fields": [
+  {
+   "fieldname": "waybill_no",
+   "label": "Waybill No",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "unique": 1,
+   "description": "Freight Order number printed on the aTOMS waybill, e.g. 6101015888"
+  },
+  {
+   "fieldname": "barcode_payload",
+   "label": "Barcode Payload (aTOMS)",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "unique": 1,
+   "description": "Raw string encoded by aTOMS in the waybill barcode/QR. Nimble Vision only reads it."
+  },
+  {
+   "fieldname": "freight_order",
+   "label": "SAP Freight Order",
+   "fieldtype": "Data",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vehicle",
+   "label": "Vehicle",
+   "fieldtype": "Link",
+   "options": "Kharj Fleet Vehicle",
+   "reqd": 1
+  },
+  {
+   "fieldname": "station",
+   "label": "Authorised Station",
+   "fieldtype": "Link",
+   "options": "Kharj Station"
+  },
+  {
+   "fieldname": "cb1",
+   "label": "",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "product",
+   "label": "Product",
+   "fieldtype": "Select",
+   "options": "AdBlue\nDiesel",
+   "default": "AdBlue",
+   "reqd": 1
+  },
+  {
+   "fieldname": "entitlement_qty",
+   "label": "Entitlement Qty (L)",
+   "fieldtype": "Float",
+   "reqd": 1
+  },
+  {
+   "fieldname": "dispensed_qty",
+   "label": "Dispensed Qty (L)",
+   "fieldtype": "Float",
+   "read_only": 1
+  },
+  {
+   "fieldname": "balance_qty",
+   "label": "Balance Qty (L)",
+   "fieldtype": "Float",
+   "read_only": 1
+  },
+  {
+   "fieldname": "valid_from",
+   "label": "Valid From",
+   "fieldtype": "Datetime",
+   "reqd": 1
+  },
+  {
+   "fieldname": "valid_to",
+   "label": "Valid To",
+   "fieldtype": "Datetime",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sec_status",
+   "label": "Status",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "status",
+   "label": "Status",
+   "fieldtype": "Select",
+   "options": "Open\nPartially Dispensed\nClosed\nCancelled\nExpired",
+   "default": "Open",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "route",
+   "label": "Route",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "trip_start",
+   "label": "Trip Start",
+   "fieldtype": "Datetime"
+  },
+  {
+   "fieldname": "sap_sync_status",
+   "label": "SAP Sync Status",
+   "fieldtype": "Select",
+   "options": "Pending\nSynced\nFailed",
+   "default": "Pending",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-26 00:00:00",
+ "modified_by": "Administrator",
+ "module": "Kharj Fuel",
+ "name": "Kharj Waybill",
+ "owner": "Administrator",
+ "istable": 0,
+ "track_changes": 1,
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Kharj Operator",
+   "write": 1,
+   "create": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "autoname": "field:waybill_no",
+ "title_field": "waybill_no"
+}

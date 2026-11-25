@@ -1,0 +1,39 @@
+# ==============================================================================
+# Systemd Service for Kharj IoT MQTT Ingest Worker
+# File destination on Ubuntu: /etc/systemd/system/kharj-mqtt.service
+# Commands to enable:
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable kharj-mqtt
+#   sudo systemctl start kharj-mqtt
+# ==============================================================================
+
+[Unit]
+Description=Kharj Fuel IoT MQTT Telemetry Ingest Worker
+After=network.target mosquitto.service mariadb.service redis.service
+Wants=mosquitto.service
+
+[Service]
+Type=simple
+User=frappe
+Group=frappe
+WorkingDirectory=/home/frappe/frappe-bench/apps/nimble_kharj/nimble_kharj/services
+
+# Environment Variables
+Environment=PYTHONUNBUFFERED=1
+Environment=MQTT_BROKER_HOST=127.0.0.1
+Environment=MQTT_BROKER_PORT=1883
+Environment=MQTT_TOPIC=kharj/iot/dispense
+Environment=FRAPPE_SITE=site1.local
+Environment=FRAPPE_BASE_URL=http://127.0.0.1:8000
+
+# Executing using the frappe-bench virtualenv python
+ExecStart=/home/frappe/frappe-bench/env/bin/python /home/frappe/frappe-bench/apps/nimble_kharj/nimble_kharj/services/mqtt_worker.py
+
+Restart=always
+RestartSec=5s
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+

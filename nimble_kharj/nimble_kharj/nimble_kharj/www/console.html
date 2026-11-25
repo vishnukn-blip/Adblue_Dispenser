@@ -1,0 +1,8 @@
+<!-- Serves the Vite build of console-ui at /console -->
+{% extends "templates/web.html" %}
+{% block page_content %}
+<div id="kharj-root"></div>
+<script>window.KHARJ_CSRF = "{{ frappe.session.csrf_token }}";</script>
+<script type="module" src="/assets/nimble_kharj/console/index.js"></script>
+<link rel="stylesheet" href="/assets/nimble_kharj/console/index.css">
+{% endblock %}

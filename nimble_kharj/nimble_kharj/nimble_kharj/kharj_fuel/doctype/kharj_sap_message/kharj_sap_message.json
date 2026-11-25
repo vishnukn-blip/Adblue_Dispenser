@@ -1,0 +1,119 @@
+{
+ "actions": [],
+ "creation": "2026-08-26 00:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "direction",
+  "message_type",
+  "reference_doctype",
+  "reference_name",
+  "status",
+  "attempts",
+  "last_error",
+  "sap_document_no",
+  "payload",
+  "response"
+ ],
+ "fields": [
+  {
+   "fieldname": "direction",
+   "label": "Direction",
+   "fieldtype": "Select",
+   "options": "Outbound\nInbound",
+   "default": "Outbound",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "message_type",
+   "label": "Message Type",
+   "fieldtype": "Select",
+   "options": "Dispense Posting\nFreight Order Pull\nWaybill Close\nReconciliation",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "reference_doctype",
+   "label": "Reference DocType",
+   "fieldtype": "Link",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "reference_name",
+   "label": "Reference Name",
+   "fieldtype": "Dynamic Link",
+   "options": "reference_doctype",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "status",
+   "label": "Status",
+   "fieldtype": "Select",
+   "options": "Queued\nSent\nAcknowledged\nFailed",
+   "default": "Queued",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "attempts",
+   "label": "Attempts",
+   "fieldtype": "Int",
+   "default": "0"
+  },
+  {
+   "fieldname": "last_error",
+   "label": "Last Error",
+   "fieldtype": "Small Text"
+  },
+  {
+   "fieldname": "sap_document_no",
+   "label": "SAP Document No",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "payload",
+   "label": "Payload",
+   "fieldtype": "Code",
+   "options": "JSON"
+  },
+  {
+   "fieldname": "response",
+   "label": "Response",
+   "fieldtype": "Code",
+   "options": "JSON"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-26 00:00:00",
+ "modified_by": "Administrator",
+ "module": "Kharj Fuel",
+ "name": "Kharj SAP Message",
+ "owner": "Administrator",
+ "istable": 0,
+ "track_changes": 1,
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Kharj Operator",
+   "write": 1,
+   "create": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "autoname": "hash"
+}

@@ -1,0 +1,73 @@
+{
+ "actions": [],
+ "creation": "2026-11-03 16:30:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "vehicle_id",
+  "dispensed_liters",
+  "date_time"
+ ],
+ "fields": [
+  {
+   "fieldname": "vehicle_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle ID",
+   "reqd": 1
+  },
+  {
+   "fieldname": "dispensed_liters",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Dispensed Liters",
+   "reqd": 1,
+   "precision": "2"
+  },
+  {
+   "fieldname": "date_time",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Date Time",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-11-03 16:30:00",
+ "modified_by": "Administrator",
+ "module": "Kharj Fuel",
+ "name": "Kharj IoT Dispense Log",
+ "owner": "Administrator",
+ "istable": 0,
+ "track_changes": 1,
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Kharj Operator",
+   "write": 1
+  }
+ ],
+ "sort_field": "date_time",
+ "sort_order": "DESC",
+ "states": [],
+ "autoname": "IOT-.YYYY.-.#####"
+}
+

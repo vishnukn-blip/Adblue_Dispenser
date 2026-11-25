@@ -1,0 +1,2 @@
+Copyright (c) 2026 Nimble Vision Technologies Pvt. Ltd.
+Proprietary. Built on Frappe Framework (MIT). No ERPNext imports.
