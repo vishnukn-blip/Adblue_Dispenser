@@ -31,8 +31,8 @@ except Exception:
     pass
 
 candidate_dirs = [
-    os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "nimble_kharj", "nimble_kharj", "console-ui", "dist")),
     os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "dist")),
+    os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "nimble_kharj", "nimble_kharj", "console-ui", "dist")),
     os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "dist")),
 ]
 DIST_DIR = next((d for d in candidate_dirs if os.path.isdir(d)), candidate_dirs[0])
@@ -1661,6 +1661,8 @@ class APIHandler(BaseHTTPRequestHandler):
             self.send_json(404, {"error": "not found"})
 
 def run_http_api():
+    index_exists = os.path.isfile(os.path.join(DIST_DIR, "index.html"))
+    print(f"📁 Web UI static root: {DIST_DIR} (index.html: {'FOUND' if index_exists else 'MISSING'})")
     server = HTTPServer(("0.0.0.0", API_PORT), APIHandler)
     print(f"🌐 REST API running on Port {API_PORT}")
     server.serve_forever()
