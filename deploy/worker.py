@@ -30,12 +30,18 @@ try:
 except Exception:
     pass
 
-DIST_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "nimble_kharj", "nimble_kharj", "console-ui", "dist"))
+candidate_dirs = [
+    os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "nimble_kharj", "nimble_kharj", "console-ui", "dist")),
+    os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "dist")),
+    os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "dist")),
+]
+DIST_DIR = next((d for d in candidate_dirs if os.path.isdir(d)), candidate_dirs[0])
 
 # ─── Config ───────────────────────────────────────────────────────────────────
-DEFAULT_DB_PATH       = os.path.join(os.path.dirname(os.path.abspath(__file__)), "adblue_dispense.db") if os.name == "nt" else "/data/adblue_dispense.db"
+DEFAULT_DB_PATH       = os.path.join(os.path.dirname(os.path.abspath(__file__)), "adblue_dispense.db")
 DB_PATH               = os.getenv("DB_PATH", DEFAULT_DB_PATH)
-MQTT_HOST             = os.getenv("MQTT_HOST", "13.206.207.146" if os.name == "nt" else "172.17.0.1")
+DEFAULT_MQTT_HOST     = "13.206.207.146" if os.name == "nt" else "127.0.0.1"
+MQTT_HOST             = os.getenv("MQTT_HOST", DEFAULT_MQTT_HOST)
 MQTT_PORT             = int(os.getenv("MQTT_PORT", 1883))
 MQTT_USER             = os.getenv("MQTT_USER", "adblue_iot")
 MQTT_PASS             = os.getenv("MQTT_PASS", "adblue@2026")

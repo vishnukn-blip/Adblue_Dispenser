@@ -1,0 +1,22 @@
+[Unit]
+Description=AdBlue Dispenser IoT Worker & Console (Port 8001)
+After=network.target mosquitto.service
+Wants=mosquitto.service
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/Adblue_Dispenser/deploy
+Environment=PYTHONUNBUFFERED=1
+Environment=API_PORT=8001
+Environment=MQTT_HOST=127.0.0.1
+Environment=MQTT_PORT=1883
+Environment=DB_PATH=/home/ubuntu/Adblue_Dispenser/deploy/adblue_dispense.db
+ExecStart=/usr/bin/python3 -u /home/ubuntu/Adblue_Dispenser/deploy/worker.py
+Restart=always
+RestartSec=3s
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
