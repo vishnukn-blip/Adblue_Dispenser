@@ -4,7 +4,10 @@ import threading
 import datetime
 import os
 import sys
-from http.server import HTTPServer, BaseHTTPRequestHandler
+try:
+    from http.server import ThreadingHTTPServer as HTTPServer, BaseHTTPRequestHandler
+except ImportError:
+    from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
 try:
@@ -1663,9 +1666,15 @@ class APIHandler(BaseHTTPRequestHandler):
 def run_http_api():
     index_exists = os.path.isfile(os.path.join(DIST_DIR, "index.html"))
     print(f"📁 Web UI static root: {DIST_DIR} (index.html: {'FOUND' if index_exists else 'MISSING'})")
-    server = HTTPServer(("0.0.0.0", API_PORT), APIHandler)
-    print(f"🌐 REST API running on Port {API_PORT}")
-    server.serve_forever()
+    while True:
+        try:
+            server = HTTPServer(("0.0.0.0", API_PORT), APIHandler)
+            print(f"🌐 Multi-threaded REST API & UI running on Port {API_PORT}")
+            server.serve_forever()
+        except Exception as e:
+            print(f"⚠️ HTTP server error: {e}, restarting HTTP listener in 2s...")
+            import time
+            time.sleep(2)
 
 # ─── Main ─────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
