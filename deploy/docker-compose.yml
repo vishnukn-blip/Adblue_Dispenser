@@ -10,15 +10,14 @@ services:
     ports:
       - "8001:8001"
     volumes:
-      - adblue_data:/data
+      - ./adblue_dispense.db:/data/adblue_dispense.db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
-      - MQTT_HOST=172.17.0.1
+      - MQTT_HOST=host.docker.internal
       - MQTT_PORT=1883
       - MQTT_USER=adblue_iot
       - MQTT_PASS=adblue@2026
       - API_PORT=8001
       - DB_PATH=/data/adblue_dispense.db
-
-volumes:
-  adblue_data:
 

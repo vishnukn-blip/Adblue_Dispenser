@@ -8,8 +8,9 @@ RUN pip install --no-cache-dir paho-mqtt
 # Create volume mount point for database persistence
 RUN mkdir -p /data
 
-# Copy worker script
+# Copy worker script and static frontend distribution
 COPY worker.py /app/worker.py
+COPY dist /app/dist
 
 # Expose Web Panel & REST API
 EXPOSE 8001
