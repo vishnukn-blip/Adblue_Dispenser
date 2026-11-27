@@ -269,7 +269,7 @@ export default function DispensingConsole({
   const [station, setStation] = useState<Station>(INITIAL_STATION);
   const [mapReady, setMapReady] = useState(false);
   const [activeModal, setActiveModal] = useState<"none" | "verification" | "dispenser" | "sap" | "create_order" | "journey_flow">("none");
-  
+
   // Order creation form state (Customer & Dispatch replenishment)
   const [orderForm, setOrderForm] = useState({
     customer: "CPP RIYADH SOUTH FOODS 01 (CUSTOMER)",
@@ -665,13 +665,13 @@ export default function DispensingConsole({
           vs.map((v) =>
             v.name === d.vehicle
               ? {
-                  ...v,
-                  last_latitude: d.latitude,
-                  last_longitude: d.longitude,
-                  last_speed_kmph: d.speed_kmph,
-                  geofence_state: d.geofence,
-                  distance_m: d.distance_m,
-                }
+                ...v,
+                last_latitude: d.latitude,
+                last_longitude: d.longitude,
+                last_speed_kmph: d.speed_kmph,
+                geofence_state: d.geofence,
+                distance_m: d.distance_m,
+              }
               : v
           )
         );
@@ -700,8 +700,8 @@ export default function DispensingConsole({
 
   const activeWaybill = useMemo(() => {
     return waybills.find((w) => w.waybill_no === selectedWaybillNo) ||
-           waybills.find((w) => w.vehicle === focusVehicle?.name) ||
-           waybills[0];
+      waybills.find((w) => w.vehicle === focusVehicle?.name) ||
+      waybills[0];
   }, [waybills, selectedWaybillNo, focusVehicle]);
 
   const activeUnit = units.find((u) => u.product === "AdBlue") || units[0];
@@ -731,14 +731,14 @@ export default function DispensingConsole({
         vs.map((v) =>
           v.name === vehName
             ? {
-                ...v,
-                last_latitude: lat,
-                last_longitude: lng,
-                last_speed_kmph: fraction === 1 ? 0 : Math.round(62 * (1 - fraction) + 8),
-                geofence_state: isInside ? "Inside" : "Outside",
-                distance_m: dist,
-                fix_age_s: 0,
-              }
+              ...v,
+              last_latitude: lat,
+              last_longitude: lng,
+              last_speed_kmph: fraction === 1 ? 0 : Math.round(62 * (1 - fraction) + 8),
+              geofence_state: isInside ? "Inside" : "Outside",
+              distance_m: dist,
+              fix_age_s: 0,
+            }
             : v
         )
       );
@@ -816,11 +816,11 @@ export default function DispensingConsole({
           wbList.map((w) =>
             w.waybill_no === activeWaybill.waybill_no
               ? {
-                  ...w,
-                  dispensed_qty: w.dispensed_qty + curr,
-                  balance_qty: Math.max(0, w.balance_qty - curr),
-                  status: w.balance_qty - curr <= 0.1 ? "Completed" : "Open",
-                }
+                ...w,
+                dispensed_qty: w.dispensed_qty + curr,
+                balance_qty: Math.max(0, w.balance_qty - curr),
+                status: w.balance_qty - curr <= 0.1 ? "Completed" : "Open",
+              }
               : w
           )
         );
@@ -1026,12 +1026,12 @@ export default function DispensingConsole({
     if (outboxCount > 0) {
       pushEvent("SAP_DRAIN", "Reconciling transactions with SAP...", "SAP");
       setTimeout(() => {
-      setTxns((tList) =>
-        tList.map((t) => ({ ...t, sap_status: "Posted", sap_document_no: t.sap_document_no || "49" + Math.floor(10000000 + Math.random() * 90000000) }))
-      );
-      setOutboxCount(0);
-      pushEvent("SAP_RECONCILED", "SAP Outbox 100% synchronized", "SAP");
-    }, 800);
+        setTxns((tList) =>
+          tList.map((t) => ({ ...t, sap_status: "Posted", sap_document_no: t.sap_document_no || "49" + Math.floor(10000000 + Math.random() * 90000000) }))
+        );
+        setOutboxCount(0);
+        pushEvent("SAP_RECONCILED", "SAP Outbox 100% synchronized", "SAP");
+      }, 800);
     }
   };
 
@@ -1459,7 +1459,7 @@ export default function DispensingConsole({
           </div>
         </div>
       </header>
-       {/* --------------------------------------------------------------------
+      {/* --------------------------------------------------------------------
           ROLE VIEW 1: FLEET DRIVER MOBILE VIEW
           -------------------------------------------------------------------- */}
       {/* --------------------------------------------------------------------
@@ -2778,165 +2778,165 @@ export default function DispensingConsole({
                 </div>
               </div>
 
-                {/* Audit Slip Modal Inspecting All 13 Fields */}
-                {inspectedIotLog && (
+              {/* Audit Slip Modal Inspecting All 13 Fields */}
+              {inspectedIotLog && (
+                <div
+                  style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: "rgba(15, 23, 42, 0.65)",
+                    backdropFilter: "blur(4px)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 9999,
+                    padding: "20px",
+                  }}
+                  onClick={() => setInspectedIotLog(null)}
+                >
                   <div
                     style={{
-                      position: "fixed",
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      background: "rgba(15, 23, 42, 0.65)",
-                      backdropFilter: "blur(4px)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      zIndex: 9999,
-                      padding: "20px",
+                      background: "#ffffff",
+                      borderRadius: "16px",
+                      width: "100%",
+                      maxWidth: "680px",
+                      boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)",
+                      overflow: "hidden",
+                      border: "1px solid rgba(0,0,0,0.1)",
                     }}
-                    onClick={() => setInspectedIotLog(null)}
+                    onClick={(e) => e.stopPropagation()}
                   >
                     <div
                       style={{
-                        background: "#ffffff",
-                        borderRadius: "16px",
-                        width: "100%",
-                        maxWidth: "680px",
-                        boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)",
-                        overflow: "hidden",
-                        border: "1px solid rgba(0,0,0,0.1)",
+                        background: "linear-gradient(135deg, #0f2b5c 0%, #1e40af 100%)",
+                        color: "#ffffff",
+                        padding: "18px 24px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
                       }}
-                      onClick={(e) => e.stopPropagation()}
                     >
-                      <div
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: 800, fontSize: "16px" }}>
+                        <span>🔍</span> Transaction Audit Slip &amp; IoT Telemetry
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setInspectedIotLog(null)}
                         style={{
-                          background: "linear-gradient(135deg, #0f2b5c 0%, #1e40af 100%)",
+                          background: "rgba(255,255,255,0.2)",
+                          border: "none",
                           color: "#ffffff",
-                          padding: "18px 24px",
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
+                          width: "30px",
+                          height: "30px",
+                          borderRadius: "50%",
+                          cursor: "pointer",
+                          fontWeight: 800,
                         }}
                       >
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: 800, fontSize: "16px" }}>
-                          <span>🔍</span> Transaction Audit Slip &amp; IoT Telemetry
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setInspectedIotLog(null)}
-                          style={{
-                            background: "rgba(255,255,255,0.2)",
-                            border: "none",
-                            color: "#ffffff",
-                            width: "30px",
-                            height: "30px",
-                            borderRadius: "50%",
-                            cursor: "pointer",
-                            fontWeight: 800,
-                          }}
-                        >
-                          ✕
-                        </button>
-                      </div>
+                        ✕
+                      </button>
+                    </div>
 
-                      <div style={{ padding: "20px 24px", maxHeight: "75vh", overflowY: "auto" }}>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                          <div style={{ background: "rgba(109,40,217,0.06)", border: "1px solid rgba(109,40,217,0.2)", borderRadius: "8px", padding: "10px 14px" }}>
-                            <div style={{ fontSize: "11px", fontWeight: 700, color: "#6d28d9", textTransform: "uppercase" }}>1. Transaction ID (TXN_ID)</div>
-                            <div style={{ fontSize: "14px", fontWeight: 800, fontFamily: "var(--font-mono)", color: "var(--text-1)", marginTop: "2px" }}>
-                              {inspectedIotLog.txn_id || `TXN-${inspectedIotLog.id}`}
-                            </div>
-                          </div>
-
-                          <div style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)", borderRadius: "8px", padding: "10px 14px" }}>
-                            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase" }}>2. Dispenser ID</div>
-                            <div style={{ fontSize: "14px", fontWeight: 800, color: "var(--text-1)", marginTop: "2px" }}>
-                              {inspectedIotLog.dispenser_id || "ADB-DU-01"}
-                            </div>
-                          </div>
-
-                          <div style={{ background: "rgba(37,99,235,0.06)", border: "1px solid rgba(37,99,235,0.2)", borderRadius: "8px", padding: "10px 14px" }}>
-                            <div style={{ fontSize: "11px", fontWeight: 700, color: "#1d4ed8", textTransform: "uppercase" }}>3. Vehicle ID</div>
-                            <div style={{ fontSize: "15px", fontWeight: 800, color: "#1d4ed8", marginTop: "2px" }}>
-                              🚚 {inspectedIotLog.vehicle_id}
-                            </div>
-                          </div>
-
-                          <div style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)", borderRadius: "8px", padding: "10px 14px" }}>
-                            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase" }}>4. Trailer Number</div>
-                            <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-1)", marginTop: "2px" }}>
-                              {inspectedIotLog.trailer_no || "—"}
-                            </div>
-                          </div>
-
-                          <div style={{ background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.2)", borderRadius: "8px", padding: "10px 14px" }}>
-                            <div style={{ fontSize: "11px", fontWeight: 700, color: "#b45309", textTransform: "uppercase" }}>5. Waybill Number</div>
-                            <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-1)", marginTop: "2px" }}>
-                              {inspectedIotLog.waybill_no || "—"}
-                            </div>
-                          </div>
-
-                          <div style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.25)", borderRadius: "8px", padding: "10px 14px" }}>
-                            <div style={{ fontSize: "11px", fontWeight: 700, color: "#047857", textTransform: "uppercase" }}>6. Dispensed Volume</div>
-                            <div style={{ fontSize: "18px", fontWeight: 800, color: "#047857", marginTop: "2px" }}>
-                              💧 {Number(inspectedIotLog.dispensed_liters).toFixed(2)} L
-                            </div>
-                          </div>
-
-                          <div style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)", borderRadius: "8px", padding: "10px 14px" }}>
-                            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase" }}>7. Date &amp; Time (IST)</div>
-                            <div style={{ fontSize: "13px", fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--text-1)", marginTop: "2px" }}>
-                              {inspectedIotLog.date_time}
-                            </div>
-                          </div>
-
-                          <div style={{ background: "rgba(15,118,110,0.06)", border: "1px solid rgba(15,118,110,0.2)", borderRadius: "8px", padding: "10px 14px" }}>
-                            <div style={{ fontSize: "11px", fontWeight: 700, color: "#0f766e", textTransform: "uppercase" }}>8 &amp; 9. Totaliser (Start ➔ End)</div>
-                            <div style={{ fontSize: "13px", fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--text-1)", marginTop: "2px" }}>
-                              {Number(inspectedIotLog.totaliser_start || 0).toFixed(2)} ➔ {Number(inspectedIotLog.totaliser_end || 0).toFixed(2)} L
-                            </div>
-                          </div>
-
-                          <div style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)", borderRadius: "8px", padding: "10px 14px" }}>
-                            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase" }}>10. Operator</div>
-                            <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-1)", marginTop: "2px" }}>
-                              👤 {inspectedIotLog.operator || "Operator"}
-                            </div>
-                          </div>
-
-                          <div style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)", borderRadius: "8px", padding: "10px 14px" }}>
-                            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase" }}>11. Entry Mode</div>
-                            <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-1)", marginTop: "2px" }}>
-                              🏷️ {inspectedIotLog.entry_mode || "AUTO_MQTT"}
-                            </div>
-                          </div>
-
-                          <div style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)", borderRadius: "8px", padding: "10px 14px" }}>
-                            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase" }}>12. Stop Reason</div>
-                            <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-1)", marginTop: "2px" }}>
-                              🛑 {inspectedIotLog.stop_reason || "NOZZLE_STOWED"}
-                            </div>
-                          </div>
-
-                          <div style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)", borderRadius: "8px", padding: "10px 14px" }}>
-                            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase" }}>13. Error Code</div>
-                            <div style={{ fontSize: "13px", fontWeight: 700, color: inspectedIotLog.error_code && inspectedIotLog.error_code !== "NONE" ? "#ef4444" : "#10b981", marginTop: "2px" }}>
-                              {inspectedIotLog.error_code || "NONE"}
-                            </div>
+                    <div style={{ padding: "20px 24px", maxHeight: "75vh", overflowY: "auto" }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                        <div style={{ background: "rgba(109,40,217,0.06)", border: "1px solid rgba(109,40,217,0.2)", borderRadius: "8px", padding: "10px 14px" }}>
+                          <div style={{ fontSize: "11px", fontWeight: 700, color: "#6d28d9", textTransform: "uppercase" }}>1. Transaction ID (TXN_ID)</div>
+                          <div style={{ fontSize: "14px", fontWeight: 800, fontFamily: "var(--font-mono)", color: "var(--text-1)", marginTop: "2px" }}>
+                            {inspectedIotLog.txn_id || `TXN-${inspectedIotLog.id}`}
                           </div>
                         </div>
-                      </div>
 
-                      <div style={{ padding: "14px 24px", background: "rgba(0,0,0,0.02)", borderTop: "1px solid rgba(0,0,0,0.08)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ fontSize: "12px", color: "var(--text-3)" }}>Synchronized via MQTT <code>adblue/iot/dispense</code></span>
-                        <button type="button" className="btn-action" onClick={() => setInspectedIotLog(null)}>
-                          Close
-                        </button>
+                        <div style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)", borderRadius: "8px", padding: "10px 14px" }}>
+                          <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase" }}>2. Dispenser ID</div>
+                          <div style={{ fontSize: "14px", fontWeight: 800, color: "var(--text-1)", marginTop: "2px" }}>
+                            {inspectedIotLog.dispenser_id || "ADB-DU-01"}
+                          </div>
+                        </div>
+
+                        <div style={{ background: "rgba(37,99,235,0.06)", border: "1px solid rgba(37,99,235,0.2)", borderRadius: "8px", padding: "10px 14px" }}>
+                          <div style={{ fontSize: "11px", fontWeight: 700, color: "#1d4ed8", textTransform: "uppercase" }}>3. Vehicle ID</div>
+                          <div style={{ fontSize: "15px", fontWeight: 800, color: "#1d4ed8", marginTop: "2px" }}>
+                            🚚 {inspectedIotLog.vehicle_id}
+                          </div>
+                        </div>
+
+                        <div style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)", borderRadius: "8px", padding: "10px 14px" }}>
+                          <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase" }}>4. Trailer Number</div>
+                          <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-1)", marginTop: "2px" }}>
+                            {inspectedIotLog.trailer_no || "—"}
+                          </div>
+                        </div>
+
+                        <div style={{ background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.2)", borderRadius: "8px", padding: "10px 14px" }}>
+                          <div style={{ fontSize: "11px", fontWeight: 700, color: "#b45309", textTransform: "uppercase" }}>5. Waybill Number</div>
+                          <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-1)", marginTop: "2px" }}>
+                            {inspectedIotLog.waybill_no || "—"}
+                          </div>
+                        </div>
+
+                        <div style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.25)", borderRadius: "8px", padding: "10px 14px" }}>
+                          <div style={{ fontSize: "11px", fontWeight: 700, color: "#047857", textTransform: "uppercase" }}>6. Dispensed Volume</div>
+                          <div style={{ fontSize: "18px", fontWeight: 800, color: "#047857", marginTop: "2px" }}>
+                            💧 {Number(inspectedIotLog.dispensed_liters).toFixed(2)} L
+                          </div>
+                        </div>
+
+                        <div style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)", borderRadius: "8px", padding: "10px 14px" }}>
+                          <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase" }}>7. Date &amp; Time (IST)</div>
+                          <div style={{ fontSize: "13px", fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--text-1)", marginTop: "2px" }}>
+                            {inspectedIotLog.date_time}
+                          </div>
+                        </div>
+
+                        <div style={{ background: "rgba(15,118,110,0.06)", border: "1px solid rgba(15,118,110,0.2)", borderRadius: "8px", padding: "10px 14px" }}>
+                          <div style={{ fontSize: "11px", fontWeight: 700, color: "#0f766e", textTransform: "uppercase" }}>8 &amp; 9. Totaliser (Start ➔ End)</div>
+                          <div style={{ fontSize: "13px", fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--text-1)", marginTop: "2px" }}>
+                            {Number(inspectedIotLog.totaliser_start || 0).toFixed(2)} ➔ {Number(inspectedIotLog.totaliser_end || 0).toFixed(2)} L
+                          </div>
+                        </div>
+
+                        <div style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)", borderRadius: "8px", padding: "10px 14px" }}>
+                          <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase" }}>10. Operator</div>
+                          <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-1)", marginTop: "2px" }}>
+                            👤 {inspectedIotLog.operator || "Operator"}
+                          </div>
+                        </div>
+
+                        <div style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)", borderRadius: "8px", padding: "10px 14px" }}>
+                          <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase" }}>11. Entry Mode</div>
+                          <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-1)", marginTop: "2px" }}>
+                            🏷️ {inspectedIotLog.entry_mode || "AUTO_MQTT"}
+                          </div>
+                        </div>
+
+                        <div style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)", borderRadius: "8px", padding: "10px 14px" }}>
+                          <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase" }}>12. Stop Reason</div>
+                          <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-1)", marginTop: "2px" }}>
+                            🛑 {inspectedIotLog.stop_reason || "NOZZLE_STOWED"}
+                          </div>
+                        </div>
+
+                        <div style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.1)", borderRadius: "8px", padding: "10px 14px" }}>
+                          <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase" }}>13. Error Code</div>
+                          <div style={{ fontSize: "13px", fontWeight: 700, color: inspectedIotLog.error_code && inspectedIotLog.error_code !== "NONE" ? "#ef4444" : "#10b981", marginTop: "2px" }}>
+                            {inspectedIotLog.error_code || "NONE"}
+                          </div>
+                        </div>
                       </div>
                     </div>
+
+                    <div style={{ padding: "14px 24px", background: "rgba(0,0,0,0.02)", borderTop: "1px solid rgba(0,0,0,0.08)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: "12px", color: "var(--text-3)" }}>Synchronized via MQTT <code>adblue/iot/dispense</code></span>
+                      <button type="button" className="btn-action" onClick={() => setInspectedIotLog(null)}>
+                        Close
+                      </button>
+                    </div>
                   </div>
-                )}
+                </div>
+              )}
             </section>
           </div>
 
@@ -3098,7 +3098,7 @@ export default function DispensingConsole({
                       </div>
                       <div style={{ background: "var(--sky-bg)", border: "1px solid var(--sky-bd)", borderLeft: "4px solid var(--sky)", padding: "12px", borderRadius: "var(--radius-sm)" }}>
                         <div style={{ fontSize: "9px", fontWeight: 700, color: "var(--sky-txt)", letterSpacing: ".12em", textTransform: "uppercase", marginBottom: "6px", fontFamily: "var(--font-mono)" }}>GPS Fix</div>
-                        <div style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--sky)", fontSize: "12px", lineHeight: 1.7 }}>{v.last_latitude?.toFixed(4)},<br/>{v.last_longitude?.toFixed(4)}</div>
+                        <div style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--sky)", fontSize: "12px", lineHeight: 1.7 }}>{v.last_latitude?.toFixed(4)},<br />{v.last_longitude?.toFixed(4)}</div>
                       </div>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 12px", background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)" }}>
@@ -3653,7 +3653,7 @@ export default function DispensingConsole({
                 <div className="hardware-stats-grid">
                   <div className="hardware-stat-box">
                     <div className="label">FLOW RATE</div>
-                    <div className="value" style={{color: "var(--blue)"}}>{flowRateLpm.toFixed(1)} L/M</div>
+                    <div className="value" style={{ color: "var(--blue)" }}>{flowRateLpm.toFixed(1)} L/M</div>
                   </div>
                   <div className="hardware-stat-box">
                     <div className="label">PRESET MAX</div>
@@ -3687,7 +3687,7 @@ export default function DispensingConsole({
                 {txns.slice(0, 3).map((t) => (
                   <div key={t.name} className="sap-posting-box">
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-                      <b style={{color: "var(--text-1)"}}>{t.vehicle}</b>
+                      <b style={{ color: "var(--text-1)" }}>{t.vehicle}</b>
                       <span style={{ color: "var(--purple)", fontFamily: "var(--font-mono)", fontWeight: 600 }}>DOC: {t.sap_document_no}</span>
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", color: "var(--text-2)" }}>

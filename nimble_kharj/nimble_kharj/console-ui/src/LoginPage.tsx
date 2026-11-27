@@ -40,52 +40,103 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
   return (
     <div style={{
       minHeight: "100vh",
-      width: "100%",
+      width: "100vw",
+      position: "fixed",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      margin: 0,
+      padding: "24px 16px",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      background: "radial-gradient(circle at 50% 20%, #172554 0%, #0b0f19 70%, #030712 100%)",
-      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+      background: "#070b14",
+      backgroundImage: `
+        radial-gradient(circle at 50% 10%, rgba(37, 99, 235, 0.22) 0%, transparent 60%),
+        radial-gradient(circle at 10% 80%, rgba(14, 165, 233, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 90% 90%, rgba(99, 102, 241, 0.12) 0%, transparent 50%),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px)
+      `,
+      backgroundSize: "100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px",
+      fontFamily: "'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
       color: "#f8fafc",
-      padding: "20px",
-      boxSizing: "border-box"
+      boxSizing: "border-box",
+      overflowY: "auto",
+      zIndex: 9999
     }}>
+      {/* Background ambient lighting aura */}
       <div style={{
+        position: "absolute",
+        width: "500px",
+        height: "500px",
+        borderRadius: "50%",
+        background: "radial-gradient(circle, rgba(37, 99, 235, 0.18) 0%, rgba(56, 189, 248, 0.05) 50%, transparent 70%)",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        pointerEvents: "none",
+        filter: "blur(40px)"
+      }} />
+
+      {/* Main Container Card */}
+      <div style={{
+        position: "relative",
         width: "100%",
-        maxWidth: "420px",
-        background: "rgba(15, 23, 42, 0.75)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        borderRadius: "20px",
-        border: "1px solid rgba(255, 255, 255, 0.12)",
-        boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(37, 99, 235, 0.15)",
+        maxWidth: "440px",
+        background: "rgba(13, 20, 36, 0.88)",
+        backdropFilter: "blur(24px)",
+        WebkitBackdropFilter: "blur(24px)",
+        borderRadius: "24px",
+        border: "1px solid rgba(56, 189, 248, 0.18)",
+        boxShadow: "0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 40px rgba(37, 99, 235, 0.18)",
         overflow: "hidden"
       }}>
+        {/* Top Glowing Cyan/Blue Line */}
+        <div style={{
+          height: "3px",
+          width: "100%",
+          background: "linear-gradient(90deg, #2563eb, #38bdf8, #60a5fa, #2563eb)",
+          boxShadow: "0 0 12px rgba(56, 189, 248, 0.6)"
+        }} />
+
         {/* Brand Banner Header */}
         <div style={{
-          padding: "32px 32px 24px",
+          padding: "36px 32px 24px",
           textAlign: "center",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-          background: "linear-gradient(180deg, rgba(30, 58, 138, 0.25) 0%, rgba(15, 23, 42, 0) 100%)"
+          borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
+          background: "linear-gradient(180deg, rgba(30, 58, 138, 0.22) 0%, rgba(13, 20, 36, 0) 100%)"
         }}>
+          {/* Official Nimble Vision Logo Badge */}
           <div style={{
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            width: "56px",
-            height: "56px",
+            padding: "10px 20px",
+            background: "#ffffff",
             borderRadius: "16px",
-            background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
-            boxShadow: "0 8px 16px rgba(37, 99, 235, 0.35)",
-            marginBottom: "16px"
+            boxShadow: "0 10px 25px -4px rgba(0, 0, 0, 0.35), 0 0 25px rgba(56, 189, 248, 0.3)",
+            marginBottom: "18px",
+            border: "1px solid rgba(255, 255, 255, 0.9)"
           }}>
-            <span style={{ fontSize: "22px", fontWeight: 800, color: "#ffffff", letterSpacing: "1px" }}>NV</span>
+            <img
+              src="/nimble_vision_logo.png"
+              alt="Nimble Vision — Simplifying the way of life"
+              style={{
+                height: "48px",
+                width: "auto",
+                maxWidth: "210px",
+                objectFit: "contain",
+                display: "block"
+              }}
+            />
           </div>
 
           <h1 style={{
-            margin: "0 0 6px 0",
-            fontSize: "20px",
-            fontWeight: 700,
+            margin: "0 0 8px 0",
+            fontSize: "21px",
+            fontWeight: 800,
             letterSpacing: "-0.5px",
             color: "#ffffff"
           }}>
@@ -95,17 +146,24 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
           <div style={{
             display: "inline-flex",
             alignItems: "center",
-            gap: "6px",
+            gap: "8px",
             fontSize: "12px",
-            fontWeight: 500,
+            fontWeight: 600,
             color: "#38bdf8",
             background: "rgba(56, 189, 248, 0.1)",
-            padding: "3px 10px",
+            padding: "4px 14px",
             borderRadius: "20px",
-            border: "1px solid rgba(56, 189, 248, 0.2)"
+            border: "1px solid rgba(56, 189, 248, 0.25)"
           }}>
-            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#38bdf8", display: "inline-block" }}></span>
-            KHARJ-01 · Intelligent Forecourt
+            <span style={{
+              width: "7px",
+              height: "7px",
+              borderRadius: "50%",
+              background: "#10b981",
+              boxShadow: "0 0 8px #10b981",
+              display: "inline-block"
+            }} />
+            <span>KHARJ-01 · Intelligent Forecourt Console</span>
           </div>
         </div>
 
@@ -116,15 +174,16 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
               display: "flex",
               alignItems: "center",
               gap: "10px",
-              background: "rgba(239, 68, 68, 0.12)",
-              border: "1px solid rgba(239, 68, 68, 0.3)",
-              borderRadius: "10px",
-              padding: "10px 14px",
-              marginBottom: "20px",
+              background: "rgba(239, 68, 68, 0.14)",
+              border: "1px solid rgba(239, 68, 68, 0.35)",
+              borderRadius: "12px",
+              padding: "12px 16px",
+              marginBottom: "22px",
               color: "#fca5a5",
-              fontSize: "13px"
+              fontSize: "13px",
+              fontWeight: 500
             }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="8" x2="12" y2="12"></line>
                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -135,14 +194,14 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
           <form onSubmit={handleSubmit}>
             {/* Username Field */}
-            <div style={{ marginBottom: "18px" }}>
+            <div style={{ marginBottom: "20px" }}>
               <label style={{
                 display: "block",
                 fontSize: "12px",
-                fontWeight: 600,
+                fontWeight: 700,
                 color: "#94a3b8",
                 textTransform: "uppercase",
-                letterSpacing: "0.5px",
+                letterSpacing: "0.6px",
                 marginBottom: "8px"
               }}>
                 Username
@@ -171,30 +230,37 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
                   style={{
                     width: "100%",
                     boxSizing: "border-box",
-                    padding: "12px 14px 12px 42px",
-                    background: "rgba(15, 23, 42, 0.6)",
-                    border: "1px solid rgba(255, 255, 255, 0.15)",
-                    borderRadius: "10px",
+                    padding: "13px 14px 13px 44px",
+                    background: "rgba(15, 23, 42, 0.7)",
+                    border: "1px solid rgba(255, 255, 255, 0.12)",
+                    borderRadius: "12px",
                     color: "#ffffff",
                     fontSize: "14px",
+                    fontWeight: 500,
                     outline: "none",
-                    transition: "border-color 0.2s"
+                    transition: "all 0.2s ease"
                   }}
-                  onFocus={(e) => (e.target.style.borderColor = "#38bdf8")}
-                  onBlur={(e) => (e.target.style.borderColor = "rgba(255, 255, 255, 0.15)")}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = "#38bdf8";
+                    e.target.style.boxShadow = "0 0 0 3px rgba(56, 189, 248, 0.2)";
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = "rgba(255, 255, 255, 0.12)";
+                    e.target.style.boxShadow = "none";
+                  }}
                 />
               </div>
             </div>
 
             {/* Password Field */}
-            <div style={{ marginBottom: "20px" }}>
+            <div style={{ marginBottom: "22px" }}>
               <label style={{
                 display: "block",
                 fontSize: "12px",
-                fontWeight: 600,
+                fontWeight: 700,
                 color: "#94a3b8",
                 textTransform: "uppercase",
-                letterSpacing: "0.5px",
+                letterSpacing: "0.6px",
                 marginBottom: "8px"
               }}>
                 Password
@@ -222,17 +288,24 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
                   style={{
                     width: "100%",
                     boxSizing: "border-box",
-                    padding: "12px 42px 12px 42px",
-                    background: "rgba(15, 23, 42, 0.6)",
-                    border: "1px solid rgba(255, 255, 255, 0.15)",
-                    borderRadius: "10px",
+                    padding: "13px 44px 13px 44px",
+                    background: "rgba(15, 23, 42, 0.7)",
+                    border: "1px solid rgba(255, 255, 255, 0.12)",
+                    borderRadius: "12px",
                     color: "#ffffff",
                     fontSize: "14px",
+                    fontWeight: 500,
                     outline: "none",
-                    transition: "border-color 0.2s"
+                    transition: "all 0.2s ease"
                   }}
-                  onFocus={(e) => (e.target.style.borderColor = "#38bdf8")}
-                  onBlur={(e) => (e.target.style.borderColor = "rgba(255, 255, 255, 0.15)")}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = "#38bdf8";
+                    e.target.style.boxShadow = "0 0 0 3px rgba(56, 189, 248, 0.2)";
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = "rgba(255, 255, 255, 0.12)";
+                    e.target.style.boxShadow = "none";
+                  }}
                 />
                 <button
                   type="button"
@@ -246,10 +319,11 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
                     border: "none",
                     color: "#64748b",
                     cursor: "pointer",
-                    padding: "4px",
+                    padding: "6px",
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "center"
+                    justifyContent: "center",
+                    borderRadius: "6px"
                   }}
                   title={showPassword ? "Hide password" : "Show password"}
                 >
@@ -273,7 +347,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              marginBottom: "24px",
+              marginBottom: "26px",
               fontSize: "13px"
             }}>
               <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", color: "#cbd5e1" }}>
@@ -285,7 +359,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
                 />
                 Remember this session
               </label>
-              <span style={{ color: "#64748b", fontSize: "11px" }}>Auto-renews</span>
+              <span style={{ color: "#64748b", fontSize: "11px", fontWeight: 500 }}>Auto-renews 30d</span>
             </div>
 
             {/* Submit Button */}
@@ -294,20 +368,35 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
               disabled={loading}
               style={{
                 width: "100%",
-                padding: "13px",
-                background: loading ? "#1e3a8a" : "linear-gradient(135deg, #2563eb, #1d4ed8)",
+                padding: "14px",
+                background: loading
+                  ? "#1e3a8a"
+                  : "linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #1e40af 100%)",
                 color: "#ffffff",
                 border: "none",
-                borderRadius: "10px",
+                borderRadius: "12px",
                 fontSize: "15px",
-                fontWeight: 600,
+                fontWeight: 700,
+                letterSpacing: "0.2px",
                 cursor: loading ? "not-allowed" : "pointer",
-                boxShadow: "0 4px 12px rgba(37, 99, 235, 0.35)",
+                boxShadow: "0 6px 20px rgba(37, 99, 235, 0.45)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: "8px",
-                transition: "all 0.2s"
+                gap: "10px",
+                transition: "all 0.2s ease"
+              }}
+              onMouseOver={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                  e.currentTarget.style.boxShadow = "0 8px 25px rgba(37, 99, 235, 0.6)";
+                }
+              }}
+              onMouseOut={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.transform = "none";
+                  e.currentTarget.style.boxShadow = "0 6px 20px rgba(37, 99, 235, 0.45)";
+                }
               }}
             >
               {loading ? (
@@ -320,12 +409,12 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
                     borderTopColor: "#ffffff",
                     animation: "btn-spin 0.8s linear infinite"
                   }} />
-                  Authenticating...
+                  <span>Verifying Credentials...</span>
                 </>
               ) : (
                 <>
                   <span>Sign In to Console</span>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                     <polyline points="12 5 19 12 12 19"></polyline>
                   </svg>
@@ -338,13 +427,22 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
         {/* Security Badge Footer */}
         <div style={{
           padding: "16px 32px",
-          background: "rgba(10, 15, 26, 0.6)",
+          background: "rgba(9, 14, 26, 0.75)",
           borderTop: "1px solid rgba(255, 255, 255, 0.05)",
           textAlign: "center",
           fontSize: "11px",
-          color: "#64748b"
+          fontWeight: 500,
+          color: "#64748b",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "8px"
         }}>
-          ISO 22241 / AUS 32 Compliant · Cryptographic Session Guard
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span>ISO 22241 / AUS 32 Compliant · 256-Bit Cryptographic Guard</span>
         </div>
       </div>
 

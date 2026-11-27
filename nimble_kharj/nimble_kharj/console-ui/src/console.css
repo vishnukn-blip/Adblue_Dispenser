@@ -83,7 +83,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
-  padding: 20px;
+  margin: 0;
+  padding: 0;
   overflow-x: hidden;
 }
 
@@ -93,7 +94,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  padding-bottom: 96px;
+  padding: 20px 20px 96px 20px;
 }
 
 /* ── PANELS ─────────────────────────────────────────────── */
