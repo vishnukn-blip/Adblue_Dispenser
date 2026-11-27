@@ -22,3 +22,9 @@ __pycache__/
 
 # Logs
 *.log
+
+# SQLite Databases (prevent overwriting live IoT data)
+*.db
+*.sqlite
+*.sqlite3
+deploy/*.db
