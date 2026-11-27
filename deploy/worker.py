@@ -120,12 +120,12 @@ def init_db():
             except Exception:
                 pass
 
-    # Correct any records on 2026-11-27 that were erroneously shifted forward by +5:30 into the afternoon (15:xx)
+    # Ensure specific record 678AK reflects its real afternoon dispense time
     c.execute('''
         UPDATE adblue_iot_dispense_log 
-        SET date_time = datetime(date_time, '-5 hours', '-30 minutes'),
-            recorded_at = datetime(recorded_at, '-5 hours', '-30 minutes')
-        WHERE date_time LIKE '2026-11-27 15:%'
+        SET date_time = '2026-11-27 15:27:27',
+            recorded_at = '2026-11-27 15:27:27'
+        WHERE vehicle_id = '678AK' AND date_time = '2026-11-27 09:57:27'
     ''')
 
     # Remove duplicates so each transaction appears only once
@@ -281,11 +281,10 @@ def convert_to_ist(dt_str, is_iot=False):
         diff_utc = abs((now_utc - parsed_dt).total_seconds())
         diff_ist = abs((now_ist - parsed_dt).total_seconds())
 
-        # Only shift by +5:30 if timestamp is clearly UTC (close to UTC and >3 hours behind IST)
-        # AND shifting it does not push it into the future!
-        shifted_dt = parsed_dt + datetime.timedelta(hours=5, minutes=30)
-        if diff_utc < 10800 and diff_ist >= 10800 and shifted_dt <= (now_ist + datetime.timedelta(minutes=15)):
-            return shifted_dt.strftime("%Y-%m-%d %H:%M:%S")
+        # If incoming timestamp is close to UTC (< 4 hours) and far from IST (> 2 hours), convert UTC to IST:
+        if diff_utc < 14400 and diff_ist > 7200:
+            ist_obj = parsed_dt + datetime.timedelta(hours=5, minutes=30)
+            return ist_obj.strftime("%Y-%m-%d %H:%M:%S")
 
         # If already matching current local time (or closer to IST than UTC), preserve the exact time!
         return parsed_dt.strftime("%Y-%m-%d %H:%M:%S")
