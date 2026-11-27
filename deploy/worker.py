@@ -120,12 +120,12 @@ def init_db():
             except Exception:
                 pass
 
-    # Shift existing UTC records to IST (+5:30) if recorded in UTC morning hours
+    # Correct any records on 2026-11-27 that were erroneously shifted forward by +5:30 into the afternoon (15:xx)
     c.execute('''
         UPDATE adblue_iot_dispense_log 
-        SET date_time = datetime(date_time, '+5 hours', '30 minutes'),
-            recorded_at = datetime(recorded_at, '+5 hours', '30 minutes')
-        WHERE date_time LIKE '2026-11-% 0%' OR date_time LIKE '2026-11-% 10:%'
+        SET date_time = datetime(date_time, '-5 hours', '-30 minutes'),
+            recorded_at = datetime(recorded_at, '-5 hours', '-30 minutes')
+        WHERE date_time LIKE '2026-11-27 15:%'
     ''')
 
     # Remove duplicates so each transaction appears only once
@@ -274,22 +274,20 @@ def convert_to_ist(dt_str, is_iot=False):
         if parsed_dt is None:
             return dt_str_clean
 
-        # If flagged as IoT hardware message (RUT906 sends UTC naive time)
-        if is_iot:
-            ist_obj = parsed_dt + datetime.timedelta(hours=5, minutes=30)
-            return ist_obj.strftime("%Y-%m-%d %H:%M:%S")
-
-        # Automatic detection: check if timestamp is naive UTC by comparing to current UTC vs IST
+        # Smart timezone detection:
+        # Check if timestamp is naive UTC by comparing to current UTC vs IST
         now_utc = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
         now_ist = now_utc + datetime.timedelta(hours=5, minutes=30)
         diff_utc = abs((now_utc - parsed_dt).total_seconds())
         diff_ist = abs((now_ist - parsed_dt).total_seconds())
 
-        # If timestamp is within 3 hours of UTC and >3 hours from IST, it's a UTC timestamp -> shift to IST
-        if diff_utc < 10800 and diff_ist >= 10800:
-            ist_obj = parsed_dt + datetime.timedelta(hours=5, minutes=30)
-            return ist_obj.strftime("%Y-%m-%d %H:%M:%S")
+        # Only shift by +5:30 if timestamp is clearly UTC (close to UTC and >3 hours behind IST)
+        # AND shifting it does not push it into the future!
+        shifted_dt = parsed_dt + datetime.timedelta(hours=5, minutes=30)
+        if diff_utc < 10800 and diff_ist >= 10800 and shifted_dt <= (now_ist + datetime.timedelta(minutes=15)):
+            return shifted_dt.strftime("%Y-%m-%d %H:%M:%S")
 
+        # If already matching current local time (or closer to IST than UTC), preserve the exact time!
         return parsed_dt.strftime("%Y-%m-%d %H:%M:%S")
     except Exception:
         return str(dt_str)
