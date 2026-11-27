@@ -248,7 +248,13 @@ const fmtDist = (m?: number) => {
   return m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(2)} km`;
 };
 
-export default function DispensingConsole() {
+export default function DispensingConsole({
+  currentUser = "admin",
+  onLogout,
+}: {
+  currentUser?: string;
+  onLogout?: () => void;
+} = {}) {
   const [activeTab, setActiveTab] = useState<NavTab>("today_monitor");
   const [userRole, setUserRole] = useState<"supervisor" | "operator" | "driver" | "customer">("supervisor");
   const [mapLayer, setMapLayer] = useState<MapLayerType>("light");
@@ -1411,8 +1417,44 @@ export default function DispensingConsole() {
                 TOTALIZER: <b>{activeUnit.totalizer_l.toLocaleString()} L</b>
               </div>
             )}
-            <div className="telemetry-badge">
-              USER: <b>{userRole === "supervisor" ? "Tarun Kumar (Sup)" : userRole === "operator" ? "Fahad (Operator)" : userRole === "driver" ? "R. Fernandes (Driver)" : "CPP RIYADH (Customer)"}</b>
+            <div className="telemetry-badge" style={{ display: "inline-flex", alignItems: "center", gap: "10px" }}>
+              <span>USER: <b style={{ textTransform: "capitalize", color: "#38bdf8" }}>{currentUser || "admin"}</b></span>
+              {onLogout && (
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "4px",
+                    background: "rgba(239, 68, 68, 0.15)",
+                    color: "#f87171",
+                    border: "1px solid rgba(239, 68, 68, 0.4)",
+                    borderRadius: "6px",
+                    padding: "3px 8px",
+                    fontSize: "11px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    transition: "all 0.2s ease"
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.background = "#ef4444";
+                    e.currentTarget.style.color = "#ffffff";
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.background = "rgba(239, 68, 68, 0.15)";
+                    e.currentTarget.style.color = "#f87171";
+                  }}
+                  title="Sign out of AdBlue Management Console"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                  Sign Out
+                </button>
+              )}
             </div>
           </div>
         </div>

@@ -130,6 +130,55 @@ export const workerApi = {
   },
 };
 
+export const authApi = {
+  login: async (username: string, password: string) => {
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+      return { ok: res.ok, data };
+    } catch (e: any) {
+      return { ok: false, data: { error: e.message || "Network error" } };
+    }
+  },
+
+  verify: async (token: string) => {
+    try {
+      const res = await fetch("/api/auth/verify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ token }),
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.valid ? data : null;
+    } catch {
+      return null;
+    }
+  },
+
+  logout: async (token: string) => {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ token }),
+      });
+    } catch {
+      // ignore
+    }
+  }
+};
+
 export const api = {
   scan: (barcode: string, unitId: string, vehicleNo?: string, lat?: number, lng?: number) =>
     call("dispensing.scan", { barcode, unit_id: unitId, vehicle_no: vehicleNo, latitude: lat, longitude: lng }),

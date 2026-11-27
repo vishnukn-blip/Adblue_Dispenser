@@ -4,6 +4,8 @@ import threading
 import datetime
 import os
 import sys
+import hashlib
+import secrets
 try:
     from http.server import ThreadingHTTPServer as HTTPServer, BaseHTTPRequestHandler
 except ImportError:
@@ -136,6 +138,40 @@ def init_db():
         )
     ''')
 
+    # Table 3: User Authentication
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS adblue_users (
+            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            username      TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            salt          TEXT NOT NULL,
+            role          TEXT DEFAULT 'admin',
+            created_at    DATETIME DEFAULT (datetime('now', '+5 hours', '30 minutes'))
+        )
+    ''')
+
+    # Table 4: User Sessions
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS adblue_sessions (
+            token       TEXT PRIMARY KEY,
+            username    TEXT NOT NULL,
+            role        TEXT NOT NULL,
+            created_at  DATETIME DEFAULT (datetime('now', '+5 hours', '30 minutes')),
+            expires_at  DATETIME NOT NULL
+        )
+    ''')
+
+    # Default Admin Seed: admin / admin@2026
+    c.execute("SELECT id FROM adblue_users WHERE username = 'admin'")
+    if not c.fetchone():
+        admin_salt = secrets.token_hex(16)
+        admin_hash = hashlib.sha256((admin_salt + "admin@2026").encode('utf-8')).hexdigest()
+        c.execute(
+            "INSERT INTO adblue_users (username, password_hash, salt, role) VALUES (?, ?, ?, ?)",
+            ("admin", admin_hash, admin_salt, "admin")
+        )
+        print("👤 Seeded default admin user: admin / admin@2026")
+
     conn.commit()
     conn.close()
     print("✅ AdBlue Database initialized at", DB_PATH)
@@ -145,6 +181,69 @@ IST_TZ = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
 def get_now_ist():
     """Returns current timestamp in Indian Standard Time (IST, UTC+05:30)."""
     return datetime.datetime.now(datetime.timezone.utc).astimezone(IST_TZ).strftime("%Y-%m-%d %H:%M:%S")
+
+# ─── Auth Functions ────────────────────────────────────────────────────────────
+def hash_password(password: str, salt: str) -> str:
+    return hashlib.sha256((salt + password).encode('utf-8')).hexdigest()
+
+def authenticate_user(username: str, password: str):
+    """Verifies username and password against adblue_users. Returns (True, role) or (False, None)."""
+    if not username or not password:
+        return False, None
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT password_hash, salt, role FROM adblue_users WHERE username = ?", (username.strip(),))
+    row = c.fetchone()
+    conn.close()
+    if not row:
+        return False, None
+    pwd_hash, salt, role = row
+    if hash_password(password, salt) == pwd_hash:
+        return True, role
+    return False, None
+
+def create_session(username: str, role: str = "admin", days_valid: int = 30) -> str:
+    """Creates a new session token in adblue_sessions valid for days_valid days."""
+    token = secrets.token_hex(32)
+    now_ist = datetime.datetime.now(datetime.timezone.utc).astimezone(IST_TZ)
+    expires_at = (now_ist + datetime.timedelta(days=days_valid)).strftime("%Y-%m-%d %H:%M:%S")
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute(
+        "INSERT INTO adblue_sessions (token, username, role, expires_at) VALUES (?, ?, ?, ?)",
+        (token, username.strip(), role, expires_at)
+    )
+    conn.commit()
+    conn.close()
+    return token
+
+def verify_session(token: str):
+    """Verifies session token is valid and not expired. Returns dict or None."""
+    if not token:
+        return None
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    now_str = get_now_ist()
+    c.execute("SELECT username, role, expires_at FROM adblue_sessions WHERE token = ?", (token.strip(),))
+    row = c.fetchone()
+    conn.close()
+    if not row:
+        return None
+    username, role, expires_at = row
+    if str(expires_at) < now_str:
+        delete_session(token)
+        return None
+    return {"valid": True, "username": username, "role": role}
+
+def delete_session(token: str):
+    """Deletes a session token from adblue_sessions."""
+    if not token:
+        return
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("DELETE FROM adblue_sessions WHERE token = ?", (token.strip(),))
+    conn.commit()
+    conn.close()
 
 def convert_to_ist(dt_str, is_iot=False):
     """
@@ -1517,6 +1616,20 @@ class APIHandler(BaseHTTPRequestHandler):
                 "vehicle_count": vehicle_count
             })
 
+        elif path == "/api/auth/verify":
+            auth_header = self.headers.get("Authorization", "")
+            token = ""
+            if auth_header.startswith("Bearer "):
+                token = auth_header[7:].strip()
+            if not token:
+                qs = parse_qs(parsed.query)
+                token = qs.get("token", [""])[0]
+            sess = verify_session(token)
+            if sess:
+                self.send_json(200, sess)
+            else:
+                self.send_json(401, {"valid": False, "error": "Invalid or expired session"})
+
         elif path == "/health":
             self.send_json(200, {"status": "ok", "service": "adblue-iot"})
 
@@ -1548,7 +1661,41 @@ class APIHandler(BaseHTTPRequestHandler):
             self.send_json(400, {"error": "invalid json"})
             return
 
-        if path == "/api/vehicles":
+        if path == "/api/auth/login":
+            username = str(data.get("username", "")).strip()
+            password = str(data.get("password", "")).strip()
+            ok, role = authenticate_user(username, password)
+            if ok:
+                token = create_session(username, role)
+                print(f"🔐 User logged in successfully: {username} (role: {role})")
+                self.send_json(200, {"success": True, "token": token, "username": username, "role": role})
+            else:
+                print(f"⚠️ Failed login attempt for user: {username}")
+                self.send_json(401, {"success": False, "error": "Invalid username or password"})
+
+        elif path == "/api/auth/verify":
+            token = data.get("token", "").strip()
+            if not token:
+                auth_header = self.headers.get("Authorization", "")
+                if auth_header.startswith("Bearer "):
+                    token = auth_header[7:].strip()
+            sess = verify_session(token)
+            if sess:
+                self.send_json(200, sess)
+            else:
+                self.send_json(401, {"valid": False, "error": "Invalid or expired session"})
+
+        elif path == "/api/auth/logout":
+            token = data.get("token", "").strip()
+            if not token:
+                auth_header = self.headers.get("Authorization", "")
+                if auth_header.startswith("Bearer "):
+                    token = auth_header[7:].strip()
+            delete_session(token)
+            print("🔓 User logged out, session terminated")
+            self.send_json(200, {"success": True, "message": "Logged out successfully"})
+
+        elif path == "/api/vehicles":
             vehicle_id = data.get("vehicle_id", "").strip()
             if not vehicle_id:
                 self.send_json(400, {"success": False, "error": "vehicle_id is required"})
