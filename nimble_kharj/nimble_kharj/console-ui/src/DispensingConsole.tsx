@@ -1062,20 +1062,18 @@ export default function DispensingConsole({
   }, [workerStats, iotLogs]);
 
   const realTodayDispensedLiters = useMemo(() => {
-    if (workerStats?.today_liters != null && workerStats.today_liters > 0) return workerStats.today_liters;
+    if (workerStats?.today_liters != null) return workerStats.today_liters;
     const todayStr = getLocalFormattedDateTime().slice(0, 10);
-    const sumToday = iotLogs
+    return iotLogs
       .filter((l) => (l.date_time || "").startsWith(todayStr))
       .reduce((sum, item) => sum + (Number(item.dispensed_liters) || 0), 0);
-    return sumToday > 0 ? sumToday : todayAdBlueDispensed;
-  }, [workerStats, iotLogs, todayAdBlueDispensed]);
+  }, [workerStats, iotLogs]);
 
   const todayDispenseCount = useMemo(() => {
-    if (workerStats?.today_txns != null && workerStats.today_txns > 0) return workerStats.today_txns;
+    if (workerStats?.today_txns != null) return workerStats.today_txns;
     const todayStr = getLocalFormattedDateTime().slice(0, 10);
-    const countToday = iotLogs.filter((l) => (l.date_time || "").startsWith(todayStr)).length;
-    return countToday > 0 ? countToday : todayCompletedCount;
-  }, [workerStats, iotLogs, todayCompletedCount]);
+    return iotLogs.filter((l) => (l.date_time || "").startsWith(todayStr)).length;
+  }, [workerStats, iotLogs]);
 
   const totalTxnCount = useMemo(() => {
     if (workerStats?.total_txns != null && workerStats.total_txns > 0) return workerStats.total_txns;
