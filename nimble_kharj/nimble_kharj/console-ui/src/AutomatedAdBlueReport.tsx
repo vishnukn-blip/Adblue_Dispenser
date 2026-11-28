@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 
 import {
   AdBlueReportRecord,
@@ -10,44 +10,167 @@ import {
 
 export type { AdBlueReportRecord };
 
+export interface DynamicDay {
+  shortDate: string;
+  label: string;
+  weekday: string;
+  fullDate: string;
+  txnCount?: number;
+}
+
+export const generatePast7Days = (): DynamicDay[] => {
+  const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const MONTHS_FULL = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  const days: DynamicDay[] = [];
+  const today = new Date();
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+    const dayNum = String(d.getDate()).padStart(2, "0");
+    const monthNum = String(d.getMonth() + 1).padStart(2, "0");
+    const yearNum = d.getFullYear();
+    const shortDate = `${dayNum}/${monthNum}/${yearNum}`;
+    const weekday = WEEKDAYS[d.getDay()];
+    const monthShort = MONTHS_SHORT[d.getMonth()];
+    const monthFull = MONTHS_FULL[d.getMonth()];
+    const label = i === 0 ? `${dayNum} ${monthShort} (Today)` : `${dayNum} ${monthShort} (${weekday})`;
+    const fullDate = `${dayNum} ${monthFull} ${yearNum}`;
+
+    days.push({
+      shortDate,
+      label,
+      weekday,
+      fullDate,
+    });
+  }
+
+  return days;
+};
+
+export const parseLogDateTime = (dtStr: string): { shortDate: string; hour: string } => {
+  if (!dtStr) {
+    const now = new Date();
+    const d = String(now.getDate()).padStart(2, "0");
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    const y = now.getFullYear();
+    return { shortDate: `${d}/${m}/${y}`, hour: "12:00:00" };
+  }
+  const clean = dtStr.trim().replace("T", " ");
+  const parts = clean.split(" ");
+  const datePart = parts[0];
+  const timePart = parts[1] || "12:00:00";
+
+  if (datePart.includes("-")) {
+    const [y, m, d] = datePart.split("-");
+    const shortDate = `${d.padStart(2, "0")}/${m.padStart(2, "0")}/${y}`;
+    return { shortDate, hour: timePart.slice(0, 8) };
+  } else if (datePart.includes("/")) {
+    const pieces = datePart.split("/");
+    if (pieces[0].length === 4) {
+      const [y, m, d] = pieces;
+      return { shortDate: `${d.padStart(2, "0")}/${m.padStart(2, "0")}/${y}`, hour: timePart.slice(0, 8) };
+    }
+    return { shortDate: datePart, hour: timePart.slice(0, 8) };
+  }
+  return { shortDate: datePart, hour: timePart.slice(0, 8) };
+};
+
 interface AutomatedAdBlueReportProps {
   additionalRecords?: AdBlueReportRecord[];
+  realIotLogs?: any[];
   onClose?: () => void;
   isModal?: boolean;
 }
 
 export const AutomatedAdBlueReport: React.FC<AutomatedAdBlueReportProps> = ({
   additionalRecords = [],
+  realIotLogs = [],
   onClose,
   isModal = false,
 }) => {
-  // Date scope: "week" (all 7 days), a specific shortDate "14/09/2026", "13/09/2026", etc. or "29/07/2026"
-  const [dateScope, setDateScope] = useState<string>("today");
-  const [reportDate, setReportDate] = useState<string>("14 September 2026");
+  const isRealDataActive = Boolean(realIotLogs && realIotLogs.length > 0);
+
+  // Dynamically generated rolling 7 days ending on today
+  const activePast7Days: DynamicDay[] = useMemo(() => {
+    if (isRealDataActive) {
+      return generatePast7Days();
+    }
+    return PAST_7_DAYS;
+  }, [isRealDataActive]);
+
+  const todayShortDate = activePast7Days[0]?.shortDate || "14/09/2026";
+  const todayFullDate = activePast7Days[0]?.fullDate || "14 September 2026";
+
+  // Date scope: "week" (all 7 days), "today", a specific shortDate "27/11/2026", or "all"
+  const [dateScope, setDateScope] = useState<string>("week");
+  const [reportDate, setReportDate] = useState<string>(() => {
+    if (isRealDataActive) {
+      const d = generatePast7Days();
+      return `Past 7 Days (${d[6].label.replace(" (Today)", "")} - ${d[0].label.replace(" (Today)", "")} ${new Date().getFullYear()})`;
+    }
+    return "Past 7 Days (08 - 14 September 2026)";
+  });
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [categoryFilter, setCategoryFilter] = useState<"ALL" | "TRACTOR" | "REEFER">("ALL");
   const [dispenserFilter, setDispenserFilter] = useState<string>("ALL");
   const [showCharts, setShowCharts] = useState<boolean>(true);
   const [hoveredDay, setHoveredDay] = useState<string | null>(null);
 
-  // Combine initial dataset with any additional live records
+  // Convert real IoT DB logs into standard AdBlueReportRecord format
+  const convertedRealLogs: AdBlueReportRecord[] = useMemo(() => {
+    if (!realIotLogs || realIotLogs.length === 0) return [];
+    return realIotLogs.map((log: any, idx: number) => {
+      const { shortDate, hour } = parseLogDateTime(log.date_time);
+      const dispenserMatch = String(log.dispenser_id || "1").match(/\d+/);
+      const dispenserNum = dispenserMatch ? parseInt(dispenserMatch[0], 10) : 1;
+      const isReefer = Boolean(log.trailer_no && log.trailer_no !== "—" && log.trailer_no.trim() !== "");
+
+      return {
+        id: String(log.id || log.txn_id || `DB-REP-${idx}`),
+        transactionDate: shortDate,
+        transactionHour: hour,
+        vehicle: log.vehicle_id || "UNKNOWN",
+        dispenserNumber: dispenserNum,
+        quantity: Number(log.dispensed_liters) || 0,
+        quantityUnits: "L",
+        adblueProductCode: "1",
+        site: "ALMARAI KHARJ",
+        vehiclesCategory: isReefer ? "REEFER" : "TRACTOR",
+        vehicleIdentifier: isReefer ? log.trailer_no : (log.vehicle_id || "UNKNOWN"),
+        waybillNo: (log.waybill_no && log.waybill_no !== "—") ? log.waybill_no : (log.txn_id || `WB-${idx}`),
+        driverName: (log.operator && log.operator !== "NA") ? log.operator : "Almarai Driver",
+      };
+    });
+  }, [realIotLogs]);
+
+  // Combine real dataset or fallback initial dataset with any additional live records
   const masterRecords = useMemo(() => {
+    if (convertedRealLogs.length > 0) {
+      return [...convertedRealLogs, ...additionalRecords];
+    }
     return [...INITIAL_ADBLUE_REPORT_DATA, ...additionalRecords];
-  }, [additionalRecords]);
+  }, [convertedRealLogs, additionalRecords]);
 
   // Handle switching date scope
   const handleSelectDateScope = (scope: string, shouldScrollToReport: boolean = false) => {
     setDateScope(scope);
     if (scope === "week") {
-      setReportDate("Past 7 Days (08 - 14 September 2026)");
+      setReportDate(`Past 7 Days (${activePast7Days[6]?.label.replace(" (Today)", "")} - ${activePast7Days[0]?.label.replace(" (Today)", "")} ${new Date().getFullYear()})`);
     } else if (scope === "today") {
-      setReportDate("14 September 2026");
+      setReportDate(todayFullDate);
+    } else if (scope === "all") {
+      setReportDate("All Database Telemetry Records");
     } else if (scope === "29jul2026") {
       setReportDate("29th July 2026");
     } else {
       // Find matching date label
-      const dayObj = PAST_7_DAYS.find((d) => d.shortDate === scope);
-      setReportDate(dayObj?.fullDate || (dayObj ? `${dayObj.label} 2026` : scope));
+      const dayObj = activePast7Days.find((d) => d.shortDate === scope);
+      setReportDate(dayObj?.fullDate || (dayObj ? `${dayObj.label}` : scope));
     }
 
     if (shouldScrollToReport) {
@@ -60,20 +183,24 @@ export const AutomatedAdBlueReport: React.FC<AutomatedAdBlueReportProps> = ({
   // Scope filter: determines which records appear in the report table & KPIs
   const scopedRecords = useMemo(() => {
     if (dateScope === "week") {
+      const weekDateSet = new Set(activePast7Days.map((d) => d.shortDate));
+      return masterRecords.filter((r) => weekDateSet.has(r.transactionDate));
+    }
+    if (dateScope === "all") {
       return masterRecords;
     }
     if (dateScope === "today") {
-      return masterRecords.filter((r) => r.transactionDate === "14/09/2026");
+      return masterRecords.filter((r) => r.transactionDate === todayShortDate);
     }
     if (dateScope === "29jul2026") {
       // Audit sample view
       return masterRecords
-        .filter((r) => r.transactionDate === "14/09/2026")
+        .filter((r) => r.transactionDate === todayShortDate)
         .map((r) => ({ ...r, transactionDate: "29/07/2026" }));
     }
     // Specific date match
     return masterRecords.filter((r) => r.transactionDate === dateScope);
-  }, [masterRecords, dateScope]);
+  }, [masterRecords, dateScope, activePast7Days, todayShortDate]);
 
   // Apply user filters (category, dispenser, search text)
   const filteredRecords = useMemo(() => {
@@ -126,8 +253,8 @@ export const AutomatedAdBlueReport: React.FC<AutomatedAdBlueReportProps> = ({
 
   // ================= 7-DAY ANALYTICS AGGREGATIONS FOR CHARTS =================
   const weeklyAnalytics = useMemo(() => {
-    // 7 Days chronological array (from 08 Sep to 14 Sep)
-    const chronologicalDays = [...PAST_7_DAYS].reverse();
+    // 7 Days chronological array (from 6 days ago up to Today)
+    const chronologicalDays = [...activePast7Days].reverse();
 
     const dailyTrend = chronologicalDays.map((d) => {
       const dayRecs = masterRecords.filter((r) => r.transactionDate === d.shortDate);
@@ -141,6 +268,7 @@ export const AutomatedAdBlueReport: React.FC<AutomatedAdBlueReportProps> = ({
         shortDate: d.shortDate,
         label: d.label.replace(" (Today)", ""),
         weekday: d.weekday,
+        isToday: d.shortDate === todayShortDate,
         litres: dayLitres,
         count: dayRecs.length,
         tractorCount: tractors.length,
@@ -150,24 +278,38 @@ export const AutomatedAdBlueReport: React.FC<AutomatedAdBlueReportProps> = ({
       };
     });
 
-    const maxDayLitres = Math.max(...dailyTrend.map((d) => d.litres), 700);
-    const totalWeekLitres = masterRecords.reduce((sum, r) => sum + r.quantity, 0);
-    const totalWeekVehicles = masterRecords.length;
-    const weekTractorLitres = masterRecords
+    const weekDateSet = new Set(chronologicalDays.map((d) => d.shortDate));
+    const weekRecords = masterRecords.filter((r) => weekDateSet.has(r.transactionDate));
+
+    const totalWeekLitres = weekRecords.reduce((sum, r) => sum + r.quantity, 0);
+    const totalWeekVehicles = weekRecords.length;
+    const weekTractorLitres = weekRecords
       .filter((r) => r.vehiclesCategory === "TRACTOR")
       .reduce((sum, r) => sum + r.quantity, 0);
-    const weekReeferLitres = masterRecords
+    const weekReeferLitres = weekRecords
       .filter((r) => r.vehiclesCategory === "REEFER")
       .reduce((sum, r) => sum + r.quantity, 0);
+
+    const peakDay = dailyTrend.reduce((prev, curr) => (curr.litres > prev.litres ? curr : prev), dailyTrend[0]);
+    const todayTrend = dailyTrend.find((d) => d.isToday) || dailyTrend[dailyTrend.length - 1];
+
+    const rawMax = Math.max(...dailyTrend.map((d) => d.litres), 10);
+    let maxScale = Math.ceil(rawMax * 1.15);
+    if (maxScale < 10) maxScale = 10;
+    else if (maxScale <= 50) maxScale = Math.ceil(maxScale / 10) * 10;
+    else if (maxScale <= 200) maxScale = Math.ceil(maxScale / 25) * 25;
+    else maxScale = Math.ceil(maxScale / 50) * 50;
+
+    const maxDayLitres = maxScale;
 
     // Dispenser load across 10 bays over the week
     const bayLoads: { bay: number; litres: number; count: number }[] = [];
     for (let b = 1; b <= 10; b++) {
-      const bayRecs = masterRecords.filter((r) => Number(r.dispenserNumber) === b);
+      const bayRecs = weekRecords.filter((r) => Number(r.dispenserNumber) === b);
       const bayL = bayRecs.reduce((sum, r) => sum + r.quantity, 0);
       bayLoads.push({ bay: b, litres: bayL, count: bayRecs.length });
     }
-    const maxBayLitres = Math.max(...bayLoads.map((b) => b.litres), 500);
+    const maxBayLitres = Math.max(...bayLoads.map((b) => b.litres), 10);
 
     // Hourly Shift Activity Breakdown
     const shiftStats = [
@@ -177,8 +319,8 @@ export const AutomatedAdBlueReport: React.FC<AutomatedAdBlueReportProps> = ({
       { shift: "Evening Return (18:00 - 22:00)", hours: "18:00 - 22:00", count: 0, litres: 0, color: "#8b5cf6" },
     ];
 
-    masterRecords.forEach((r) => {
-      const hr = parseInt(r.transactionHour.split(":")[0], 10);
+    weekRecords.forEach((r) => {
+      const hr = parseInt((r.transactionHour || "12").split(":")[0], 10);
       if (hr >= 6 && hr < 10) {
         shiftStats[0].count++;
         shiftStats[0].litres += r.quantity;
@@ -201,11 +343,14 @@ export const AutomatedAdBlueReport: React.FC<AutomatedAdBlueReportProps> = ({
       totalWeekVehicles,
       weekTractorLitres,
       weekReeferLitres,
+      peakDay,
+      todayTrend,
       bayLoads,
       maxBayLitres,
       shiftStats,
+      chronologicalDays,
     };
-  }, [masterRecords]);
+  }, [masterRecords, activePast7Days, todayShortDate]);
 
   // Export to CSV with Waybill number as the 1st column
   const handleExportCSV = () => {
@@ -279,7 +424,7 @@ export const AutomatedAdBlueReport: React.FC<AutomatedAdBlueReportProps> = ({
             className={`btn-date-preset ${dateScope === "today" ? "active" : ""}`}
             onClick={() => handleSelectDateScope("today")}
           >
-            ⚡ Today (14 Sep)
+            ⚡ Today ({activePast7Days[0]?.label.replace(" (Today)", "")})
           </button>
           <button
             className={`btn-date-preset highlight-week ${dateScope === "week" ? "active" : ""}`}
@@ -287,42 +432,23 @@ export const AutomatedAdBlueReport: React.FC<AutomatedAdBlueReportProps> = ({
           >
             📊 Past 7 Days (Full Week)
           </button>
-          <button
-            className={`btn-date-preset ${dateScope === "13/09/2026" ? "active" : ""}`}
-            onClick={() => handleSelectDateScope("13/09/2026")}
-          >
-            13 Sep (Sun)
-          </button>
-          <button
-            className={`btn-date-preset ${dateScope === "12/09/2026" ? "active" : ""}`}
-            onClick={() => handleSelectDateScope("12/09/2026")}
-          >
-            12 Sep (Sat)
-          </button>
-          <button
-            className={`btn-date-preset ${dateScope === "11/09/2026" ? "active" : ""}`}
-            onClick={() => handleSelectDateScope("11/09/2026")}
-          >
-            11 Sep (Fri)
-          </button>
-          <button
-            className={`btn-date-preset ${dateScope === "10/09/2026" ? "active" : ""}`}
-            onClick={() => handleSelectDateScope("10/09/2026")}
-          >
-            10 Sep (Thu)
-          </button>
-          <button
-            className={`btn-date-preset ${dateScope === "09/09/2026" ? "active" : ""}`}
-            onClick={() => handleSelectDateScope("09/09/2026")}
-          >
-            09 Sep (Wed)
-          </button>
-          <button
-            className={`btn-date-preset ${dateScope === "08/09/2026" ? "active" : ""}`}
-            onClick={() => handleSelectDateScope("08/09/2026")}
-          >
-            08 Sep (Tue)
-          </button>
+          {activePast7Days.slice(1).map((d) => (
+            <button
+              key={d.shortDate}
+              className={`btn-date-preset ${dateScope === d.shortDate ? "active" : ""}`}
+              onClick={() => handleSelectDateScope(d.shortDate)}
+            >
+              {d.label.replace(" (Today)", "")}
+            </button>
+          ))}
+          {isRealDataActive && (
+            <button
+              className={`btn-date-preset ${dateScope === "all" ? "active" : ""}`}
+              onClick={() => handleSelectDateScope("all")}
+            >
+              All DB Records
+            </button>
+          )}
           <button
             className={`btn-date-preset ${dateScope === "29jul2026" ? "active" : ""}`}
             onClick={() => handleSelectDateScope("29jul2026")}
@@ -436,7 +562,7 @@ export const AutomatedAdBlueReport: React.FC<AutomatedAdBlueReportProps> = ({
                 7-Day Forecourt Dispensing Trends &amp; Fleet Telemetry
               </h2>
               <span className="analytics-subtitle">
-                Analysis window: 08 Sep 2026 to 14 Sep 2026 • Real-time DiaLOG Latch
+                Analysis window: {weeklyAnalytics.chronologicalDays[0]?.label.replace(" (Today)", "")} to {weeklyAnalytics.chronologicalDays[6]?.label.replace(" (Today)", "")} {new Date().getFullYear()} • Real-time Forecourt Database
               </span>
             </div>
             <div className="analytics-quick-stats">
@@ -475,10 +601,10 @@ export const AutomatedAdBlueReport: React.FC<AutomatedAdBlueReportProps> = ({
               <div className="modern-bars-wrapper">
                 {/* Left Y-axis guidelines */}
                 <div className="y-axis-scale">
-                  <span>700 L</span>
-                  <span>500 L</span>
-                  <span>300 L</span>
-                  <span>100 L</span>
+                  <span>{weeklyAnalytics.maxDayLitres} L</span>
+                  <span>{(weeklyAnalytics.maxDayLitres * 0.75).toFixed(0)} L</span>
+                  <span>{(weeklyAnalytics.maxDayLitres * 0.5).toFixed(0)} L</span>
+                  <span>{(weeklyAnalytics.maxDayLitres * 0.25).toFixed(0)} L</span>
                   <span>0 L</span>
                 </div>
 
@@ -491,10 +617,12 @@ export const AutomatedAdBlueReport: React.FC<AutomatedAdBlueReportProps> = ({
 
                   <div className="bars-flex-row">
                     {weeklyAnalytics.dailyTrend.map((d) => {
-                      const isSelected = dateScope === d.shortDate || (dateScope === "today" && d.shortDate === "14/09/2026");
-                      const isToday = d.shortDate === "14/09/2026";
-                      const maxScale = 720;
-                      const totalPct = Math.min(100, Math.max(14, (d.litres / maxScale) * 100));
+                      const isSelected = dateScope === d.shortDate || (dateScope === "today" && d.isToday);
+                      const isToday = d.isToday;
+                      const maxScale = weeklyAnalytics.maxDayLitres;
+                      const totalPct = d.litres > 0
+                        ? Math.min(100, Math.max(12, (d.litres / maxScale) * 100))
+                        : 0;
 
                       return (
                         <div
@@ -507,7 +635,7 @@ export const AutomatedAdBlueReport: React.FC<AutomatedAdBlueReportProps> = ({
                         >
                           {/* Floating Top Badge */}
                           <div className="bar-top-capsule">
-                            <span className="capsule-litres font-mono">{d.litres.toFixed(0)} L</span>
+                            <span className="capsule-litres font-mono">{d.litres.toFixed(1)} L</span>
                             <span className="capsule-count">{d.count} fills</span>
                           </div>
 
@@ -515,7 +643,7 @@ export const AutomatedAdBlueReport: React.FC<AutomatedAdBlueReportProps> = ({
                           <div className="bar-track-slot">
                             <div
                               className="bar-filled-pillar"
-                              style={{ height: `${totalPct}%` }}
+                              style={{ height: d.litres > 0 ? `${totalPct}%` : "4px" }}
                             >
                               <div
                                 className={`pillar-segment ${isToday ? "today-segment" : "volume-segment"}`}
@@ -540,8 +668,15 @@ export const AutomatedAdBlueReport: React.FC<AutomatedAdBlueReportProps> = ({
 
               <div className="chart-footer-caption">
                 <div className="caption-metric-row">
-                  <span>💡 <b>Forecourt Peak:</b> 12 Sep recorded highest volume (<b>666.2 L</b> across 12 units).</span>
-                  <span>⚡ <b>Active Today:</b> <b>524.2 L</b> dispensed across 10 bays.</span>
+                  <span>
+                    💡 <b>Forecourt Peak:</b>{" "}
+                    {weeklyAnalytics.peakDay && weeklyAnalytics.peakDay.litres > 0
+                      ? `${weeklyAnalytics.peakDay.label} recorded highest volume (${weeklyAnalytics.peakDay.litres.toFixed(1)} L across ${weeklyAnalytics.peakDay.count} units).`
+                      : "No peak transactions recorded yet this week."}
+                  </span>
+                  <span>
+                    ⚡ <b>Active Today:</b> <b>{weeklyAnalytics.todayTrend?.litres.toFixed(1) || "0.0"} L</b> dispensed across {weeklyAnalytics.todayTrend?.count || 0} fills.
+                  </span>
                 </div>
               </div>
             </div>
@@ -731,14 +866,19 @@ export const AutomatedAdBlueReport: React.FC<AutomatedAdBlueReportProps> = ({
               onChange={(e) => handleSelectDateScope(e.target.value, false)}
               title="Select date to view official report for that date"
             >
-              <option value="today">⚡ 14 September 2026 (Today • 10 Units)</option>
-              <option value="13/09/2026">📅 13 September 2026 (Sun • 11 Units)</option>
-              <option value="12/09/2026">📅 12 September 2026 (Sat • 12 Units)</option>
-              <option value="11/09/2026">📅 11 September 2026 (Fri • 9 Units)</option>
-              <option value="10/09/2026">📅 10 September 2026 (Thu • 12 Units)</option>
-              <option value="09/09/2026">📅 09 September 2026 (Wed • 11 Units)</option>
-              <option value="08/09/2026">📅 08 September 2026 (Tue • 10 Units)</option>
-              <option value="week">📊 Past 7 Days Consolidated (08 - 14 Sep • 75 Units)</option>
+              <option value="today">⚡ {activePast7Days[0]?.fullDate} (Today • {masterRecords.filter((r) => r.transactionDate === todayShortDate).length} Units)</option>
+              {activePast7Days.slice(1).map((d) => {
+                const count = masterRecords.filter((r) => r.transactionDate === d.shortDate).length;
+                return (
+                  <option key={d.shortDate} value={d.shortDate}>
+                    📅 {d.fullDate} ({d.weekday} • {count} Units)
+                  </option>
+                );
+              })}
+              <option value="week">📊 Past 7 Days Consolidated ({weeklyAnalytics.chronologicalDays[0]?.label.replace(" (Today)", "")} - {weeklyAnalytics.chronologicalDays[6]?.label.replace(" (Today)", "")} • {weeklyAnalytics.totalWeekVehicles} Units)</option>
+              {isRealDataActive && (
+                <option value="all">📋 All Database Records ({masterRecords.length} Units)</option>
+              )}
               <option value="29jul2026">📋 29 July 2026 Audit Baseline</option>
             </select>
           </div>
@@ -836,7 +976,7 @@ export const AutomatedAdBlueReport: React.FC<AutomatedAdBlueReportProps> = ({
               {filteredRecords.map((row, idx) => {
                 const prevRow = idx > 0 ? filteredRecords[idx - 1] : null;
                 const isNewDateGroup = dateScope === "week" && (!prevRow || prevRow.transactionDate !== row.transactionDate);
-                const dayMatch = PAST_7_DAYS.find((d) => d.shortDate === row.transactionDate);
+                const dayMatch = activePast7Days.find((d) => d.shortDate === row.transactionDate);
                 const dayTxns = scopedRecords.filter((r) => r.transactionDate === row.transactionDate);
                 const dayLitres = dayTxns.reduce((s, r) => s + r.quantity, 0);
 

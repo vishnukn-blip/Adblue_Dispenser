@@ -2976,6 +2976,7 @@ export default function DispensingConsole({
             <div className="animate-fade-in" style={{ marginBottom: "30px" }}>
               <AutomatedAdBlueReport
                 additionalRecords={dynamicReportRecords}
+                realIotLogs={iotLogs}
               />
             </div>
           )}
@@ -3384,7 +3385,7 @@ export default function DispensingConsole({
                 <span className="dock-item-icon">📄</span>
                 <span>Official Report</span>
                 <span className="dock-badge-pill" style={{ background: "#059669", color: "#fff" }}>
-                  {INITIAL_ADBLUE_REPORT_DATA.length + dynamicReportRecords.length}
+                  {iotLogs && iotLogs.length > 0 ? (iotLogs.length + dynamicReportRecords.length) : (INITIAL_ADBLUE_REPORT_DATA.length + dynamicReportRecords.length)}
                 </span>
               </button>
 
